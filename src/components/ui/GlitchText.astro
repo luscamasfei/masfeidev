@@ -1,9 +1,9 @@
 ---
 /**
- * Monochrome glitch title driven by one SVG filter: on a few horizontal rows
- * the glyphs are dragged sideways (left on some rows, right on others) and the
- * rows tear slightly. At rest the drag is short, matching the still reference;
- * a burst stretches it for half a second on load, on hover and occasionally.
+ * Subtle monochrome glitch title. Each line shows two thin horizontal slices of
+ * itself, blurred only sideways, so a couple of rows of the letters trail to the
+ * left or right as in the reference. During a short burst (on load, on hover
+ * and occasionally) the slices jump between rows and pull further sideways.
  * The burst never runs under prefers-reduced-motion.
  */
 interface Props {
@@ -14,65 +14,45 @@ interface Props {
 }
 
 const { lines, as: Tag = 'h1', class: className, id } = Astro.props;
-const filterId = `glitch-${(id ?? lines.join('-')).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-const BURST = { dur: '0.5s', calcMode: 'discrete', begin: 'indefinite' };
+/**
+ * Resting trails per line: [top, right, bottom, left] clip insets in %. Each one
+ * keeps a thin row of a single letter (first letter for the left trail, last
+ * letter for the right one), so only that letter smears out, as in the reference.
+ */
+const trails = [
+  { left: [52, 80, 45, 0], right: [79, 0, 18, 84] },
+  { left: [36, 82, 61, 0], right: [56, 0, 41, 91] },
+];
+const inset = (v: number[]) => v.map((n) => `${n}%`).join(' ');
 ---
 
-<Tag id={id} class:list={['glitch', className]} style={`--glitch-filter: url(#${filterId})`} data-glitch={filterId}>
-  {lines.map((line) => <span class="glitch__line">{line}</span>)}
+<Tag id={id} class:list={['glitch', className]} data-glitch>
+  {
+    lines.map((line, i) => {
+      const t = trails[i % trails.length];
+      return (
+        <span class="glitch__line" data-text={line} style={`--trail-l:inset(${inset(t.left)});--trail-r:inset(${inset(t.right)})`}>
+          {line}
+        </span>
+      );
+    })
+  }
 </Tag>
 
 <svg class="glitch__defs" aria-hidden="true" focusable="false">
-  <filter id={filterId} x="-30%" y="-10%" width="160%" height="120%" color-interpolation-filters="sRGB">
-    <!-- Row pattern: thin horizontal bands; two disjoint subsets get dragged left and right. -->
-    <feTurbulence type="fractalNoise" baseFrequency="0 0.42" numOctaves="1" seed="14" result="rows"></feTurbulence>
-    <feComponentTransfer in="rows" result="rowsLeft">
-      <feFuncA type="discrete" tableValues="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0"></feFuncA>
-    </feComponentTransfer>
-    <feComponentTransfer in="rows" result="rowsRight">
-      <feFuncA type="discrete" tableValues="0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0"></feFuncA>
-    </feComponentTransfer>
-
-    <feGaussianBlur in="SourceAlpha" stdDeviation="11 0" result="blur">
-      <animate attributeName="stdDeviation" values="11 0;22 0;9 0;26 0;14 0;11 0" {...BURST}></animate>
-    </feGaussianBlur>
-
-    <feOffset in="blur" dx="-13" dy="0" result="blurLeft">
-      <animate attributeName="dx" values="-13;-32;-9;-38;-19;-13" {...BURST}></animate>
-    </feOffset>
-    <feComposite in="blurLeft" in2="rowsLeft" operator="in" result="dragLeft"></feComposite>
-
-    <feOffset in="blur" dx="13" dy="0" result="blurRight">
-      <animate attributeName="dx" values="13;28;10;34;17;13" {...BURST}></animate>
-    </feOffset>
-    <feComposite in="blurRight" in2="rowsRight" operator="in" result="dragRight"></feComposite>
-
-    <feMerge result="drag">
-      <feMergeNode in="dragLeft"></feMergeNode>
-      <feMergeNode in="dragRight"></feMergeNode>
-    </feMerge>
-    <feColorMatrix in="drag" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.9 0" result="smear"></feColorMatrix>
-
-    <!-- Row tearing: a few bands shift a little. -->
-    <feTurbulence type="fractalNoise" baseFrequency="0 0.35" numOctaves="1" seed="8" result="bands"></feTurbulence>
-    <feComponentTransfer in="bands" result="steps">
-      <feFuncR type="discrete" tableValues="0.5 0.5 0.5 0.62 0.5 0.36 0.5 0.5 0.7 0.5"></feFuncR>
-    </feComponentTransfer>
-    <feDisplacementMap in="SourceGraphic" in2="steps" scale="6" xChannelSelector="R" yChannelSelector="A" result="torn">
-      <animate attributeName="scale" values="6;18;9;22;11;6" {...BURST}></animate>
-    </feDisplacementMap>
-
-    <!-- Fine grain inside the letters. -->
-    <feTurbulence type="fractalNoise" baseFrequency="0.7 0.9" numOctaves="2" seed="3" result="grain"></feTurbulence>
-    <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.1 -0.62" result="dark"></feColorMatrix>
-    <feComposite in="dark" in2="torn" operator="in" result="darkInside"></feComposite>
-
-    <feMerge>
-      <feMergeNode in="smear"></feMergeNode>
-      <feMergeNode in="torn"></feMergeNode>
-      <feMergeNode in="darkInside"></feMergeNode>
-    </feMerge>
+  <filter id="glitch-trail-left" x="-40%" y="-20%" width="180%" height="140%">
+    <feGaussianBlur stdDeviation="6 0"></feGaussianBlur>
+    <feOffset dx="-12" dy="0"></feOffset>
+    <feComponentTransfer><feFuncA type="linear" slope="1.7"></feFuncA></feComponentTransfer>
+  </filter>
+  <filter id="glitch-trail-right" x="-40%" y="-20%" width="180%" height="140%">
+    <feGaussianBlur stdDeviation="6 0"></feGaussianBlur>
+    <feOffset dx="12" dy="0"></feOffset>
+    <feComponentTransfer><feFuncA type="linear" slope="1.7"></feFuncA></feComponentTransfer>
+  </filter>
+  <filter id="glitch-pull" x="-20%" y="-20%" width="140%" height="140%">
+    <feGaussianBlur stdDeviation="1.5 0"></feGaussianBlur>
   </filter>
 </svg>
 
@@ -80,12 +60,31 @@ const BURST = { dur: '0.5s', calcMode: 'discrete', begin: 'indefinite' };
   .glitch {
     position: relative;
     margin: 0;
-    filter: var(--glitch-filter);
   }
 
   .glitch__line {
+    position: relative;
     display: block;
     width: fit-content;
+  }
+
+  .glitch__line::before,
+  .glitch__line::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .glitch__line::before {
+    clip-path: var(--trail-l);
+    filter: url(#glitch-trail-left);
+  }
+
+  .glitch__line::after {
+    clip-path: var(--trail-r);
+    filter: url(#glitch-trail-right);
   }
 
   .glitch__defs {
@@ -94,21 +93,57 @@ const BURST = { dur: '0.5s', calcMode: 'discrete', begin: 'indefinite' };
     height: 0;
     overflow: hidden;
   }
+
+  .glitch.is-glitching .glitch__line::before {
+    animation: glitch-pull-left 0.45s steps(1, end);
+  }
+
+  .glitch.is-glitching .glitch__line::after {
+    animation: glitch-pull-right 0.45s steps(1, end);
+  }
+
+  .glitch.is-glitching .glitch__line:nth-child(2)::before,
+  .glitch.is-glitching .glitch__line:nth-child(2)::after {
+    animation-delay: 0.05s;
+  }
+
+  /* During a burst, sharp slices of the whole line are pulled sideways. */
+  @keyframes glitch-pull-left {
+    0% { clip-path: inset(24% 0 70% 0); transform: translateX(-0.07em); filter: url(#glitch-pull); opacity: 0.95; }
+    25% { clip-path: inset(60% 0 33% 0); transform: translateX(-0.12em); filter: url(#glitch-pull); opacity: 0.95; }
+    50% { clip-path: inset(41% 0 54% 0); transform: translateX(-0.05em); filter: url(#glitch-pull); opacity: 0.95; }
+    75% { clip-path: inset(74% 0 21% 0); transform: translateX(-0.1em); filter: url(#glitch-pull); opacity: 0.95; }
+  }
+
+  @keyframes glitch-pull-right {
+    0% { clip-path: inset(66% 0 28% 0); transform: translateX(0.08em); filter: url(#glitch-pull); opacity: 0.95; }
+    25% { clip-path: inset(31% 0 64% 0); transform: translateX(0.05em); filter: url(#glitch-pull); opacity: 0.95; }
+    50% { clip-path: inset(82% 0 13% 0); transform: translateX(0.12em); filter: url(#glitch-pull); opacity: 0.95; }
+    75% { clip-path: inset(47% 0 48% 0); transform: translateX(0.07em); filter: url(#glitch-pull); opacity: 0.95; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glitch.is-glitching .glitch__line::before,
+    .glitch.is-glitching .glitch__line::after {
+      animation: none;
+    }
+  }
 </style>
 
 <script>
+  const BURST_MS = 520;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   for (const el of document.querySelectorAll<HTMLElement>('[data-glitch]')) {
-    const filter = document.getElementById(el.dataset.glitch ?? '');
-    const animations = [...(filter?.querySelectorAll<SVGAnimationElement>('animate') ?? [])];
     let busy = false;
-
     const burst = () => {
-      if (busy || reduced.matches || document.hidden || animations.length === 0) return;
+      if (busy || reduced.matches || document.hidden) return;
       busy = true;
-      animations.forEach((a) => a.beginElement());
-      window.setTimeout(() => (busy = false), 600);
+      el.classList.add('is-glitching');
+      window.setTimeout(() => {
+        el.classList.remove('is-glitching');
+        busy = false;
+      }, BURST_MS);
     };
 
     const schedule = () => window.setTimeout(() => (burst(), schedule()), 9000 + Math.random() * 7000);

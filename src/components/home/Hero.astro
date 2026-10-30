@@ -25,9 +25,6 @@ import { hero } from '@/data/home';
       <p class="hero__eyebrow"><span class="hero__cursor" aria-hidden="true"></span>// {hero.eyebrow}</p>
 
       <div class="hero__name-wrap">
-        <span class="streak streak--a" aria-hidden="true"></span>
-        <span class="streak streak--b" aria-hidden="true"></span>
-        <span class="streak streak--c" aria-hidden="true"></span>
         <GlitchText id="hero-title" lines={[hero.firstName, hero.lastName]} class="hero__name" />
       </div>
 
@@ -253,30 +250,6 @@ import { hero } from '@/data/home';
     background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.55) 30%, rgb(255 255 255 / 0.55) 70%, transparent);
   }
 
-  /* Positions are relative to the name block: line 1 baseline ~4.9rem, line 2 ~9.4rem. */
-  .streak--a {
-    left: -4.1rem;
-    top: 2.15rem;
-    width: 4.5rem;
-    opacity: 0.55;
-  }
-
-  .streak--b {
-    left: -5.4rem;
-    top: 9.35rem;
-    width: 22rem;
-    opacity: 0.35;
-    background: repeating-linear-gradient(to right, rgb(255 255 255 / 0.7) 0 14px, transparent 14px 20px);
-    mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
-  }
-
-  .streak--c {
-    left: 15.4rem;
-    top: 5.25rem;
-    width: 3.6rem;
-    opacity: 0.5;
-  }
-
   .streak--d {
     left: -7.6rem;
     bottom: 0.35rem;
@@ -296,7 +269,6 @@ import { hero } from '@/data/home';
     }
 
     :global(.hero__spark--right),
-    .streak--a,
     .streak--d {
       display: none;
     }
