@@ -1,11 +1,4 @@
 ---
-/**
- * Subtle monochrome glitch title. Each line shows two thin horizontal slices of
- * itself, blurred only sideways, so a couple of rows of the letters trail to the
- * left or right as in the reference. During a short burst (on load, on hover
- * and occasionally) the slices jump between rows and pull further sideways.
- * The burst never runs under prefers-reduced-motion.
- */
 interface Props {
   lines: readonly string[];
   as?: 'h1' | 'h2' | 'p';
@@ -14,119 +7,82 @@ interface Props {
 }
 
 const { lines, as: Tag = 'h1', class: className, id } = Astro.props;
-
-/**
- * Resting trails per line: [top, right, bottom, left] clip insets in %. Each one
- * keeps a thin row of a single letter (first letter for the left trail, last
- * letter for the right one), so only that letter smears out, as in the reference.
- */
-const trails = [
-  { left: [52, 80, 45, 0], right: [79, 0, 18, 84] },
-  { left: [36, 82, 61, 0], right: [56, 0, 41, 91] },
+// The base excludes these rows; displaced copies restore the broken strokes.
+const slices = [
+  [{ top: 32, bottom: 35, shift: -0.045 }, { top: 53, bottom: 55, shift: 0.065 }, { top: 76, bottom: 80, shift: -0.025 }],
+  [{ top: 28, bottom: 31, shift: 0.035 }, { top: 49, bottom: 52, shift: -0.06 }, { top: 73, bottom: 75, shift: 0.05 }],
 ];
-const inset = (v: number[]) => v.map((n) => `${n}%`).join(' ');
 ---
 
 <Tag id={id} class:list={['glitch', className]} data-glitch>
-  {
-    lines.map((line, i) => {
-      const t = trails[i % trails.length];
-      return (
-        <span class="glitch__line" data-text={line} style={`--trail-l:inset(${inset(t.left)});--trail-r:inset(${inset(t.right)})`}>
-          {line}
-        </span>
-      );
-    })
-  }
+  {lines.map((line, i) => {
+    const bands = slices[i % slices.length];
+    const mask = `linear-gradient(to bottom, #000 0%, ${bands.map(({ top, bottom }) => `#000 ${top}%, transparent ${top}%, transparent ${bottom}%, #000 ${bottom}%`).join(', ')}, #000 100%)`;
+    return (
+      <span class="glitch__line">
+        <span class="glitch__base" style={{ maskImage: mask }}>{line}</span>
+        {bands.map(({ top, bottom, shift }, index) => (
+          <span aria-hidden="true" class:list={['glitch__slice', `glitch__slice--${index}`]}
+            style={`--cut: inset(${top}% -15% ${100 - bottom}% -15%); --shift: ${shift}em;`}>
+            {line}
+          </span>
+        ))}
+        <span class="glitch__trail glitch__trail--left" aria-hidden="true">{line}</span>
+        <span class="glitch__trail glitch__trail--right" aria-hidden="true">{line}</span>
+      </span>
+    );
+  })}
 </Tag>
 
-<svg class="glitch__defs" aria-hidden="true" focusable="false">
-  <filter id="glitch-trail-left" x="-40%" y="-20%" width="180%" height="140%">
-    <feGaussianBlur stdDeviation="6 0"></feGaussianBlur>
-    <feOffset dx="-12" dy="0"></feOffset>
-    <feComponentTransfer><feFuncA type="linear" slope="1.7"></feFuncA></feComponentTransfer>
-  </filter>
-  <filter id="glitch-trail-right" x="-40%" y="-20%" width="180%" height="140%">
-    <feGaussianBlur stdDeviation="6 0"></feGaussianBlur>
-    <feOffset dx="12" dy="0"></feOffset>
-    <feComponentTransfer><feFuncA type="linear" slope="1.7"></feFuncA></feComponentTransfer>
-  </filter>
-  <filter id="glitch-pull" x="-20%" y="-20%" width="140%" height="140%">
-    <feGaussianBlur stdDeviation="1.5 0"></feGaussianBlur>
-  </filter>
-</svg>
-
 <style>
-  .glitch {
-    position: relative;
-    margin: 0;
-  }
-
-  .glitch__line {
-    position: relative;
-    display: block;
-    width: fit-content;
-  }
-
-  .glitch__line::before,
-  .glitch__line::after {
-    content: attr(data-text);
+  .glitch { position: relative; margin: 0; }
+  .glitch__line { position: relative; display: block; width: fit-content; isolation: isolate; }
+  .glitch__base { display: block; }
+  .glitch__slice, .glitch__trail {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.7;
+    user-select: none;
   }
-
-  .glitch__line::before {
-    clip-path: var(--trail-l);
-    filter: url(#glitch-trail-left);
+  .glitch__slice {
+    clip-path: var(--cut);
+    transform: translateX(var(--shift));
   }
-
-  .glitch__line::after {
-    clip-path: var(--trail-r);
-    filter: url(#glitch-trail-right);
+  /* Fine missing scanlines cut through the displaced strokes themselves. */
+  .glitch__slice--1 {
+    mask-image: linear-gradient(to bottom, #000 0 50%, transparent 50% 51%, #000 51%);
   }
-
-  .glitch__defs {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
+  .glitch__trail {
+    opacity: 0.65;
+    filter: blur(0.35px);
+    transform-origin: left center;
   }
-
-  .glitch.is-glitching .glitch__line::before {
-    animation: glitch-pull-left 0.45s steps(1, end);
+  .glitch__trail--left {
+    clip-path: inset(54% 76% 44.5% -15%);
+    transform: translateX(-0.095em) scaleX(1.2);
   }
-
-  .glitch.is-glitching .glitch__line::after {
-    animation: glitch-pull-right 0.45s steps(1, end);
+  .glitch__trail--right {
+    clip-path: inset(78% -12% 20.5% 75%);
+    transform: translateX(0.035em) scaleX(1.055);
   }
-
-  .glitch.is-glitching .glitch__line:nth-child(2)::before,
-  .glitch.is-glitching .glitch__line:nth-child(2)::after {
-    animation-delay: 0.05s;
+  .glitch__line:nth-child(even) .glitch__trail--left {
+    clip-path: inset(30% 73% 68.5% -15%);
   }
-
-  /* During a burst, sharp slices of the whole line are pulled sideways. */
-  @keyframes glitch-pull-left {
-    0% { clip-path: inset(24% 0 70% 0); transform: translateX(-0.07em); filter: url(#glitch-pull); opacity: 0.95; }
-    25% { clip-path: inset(60% 0 33% 0); transform: translateX(-0.12em); filter: url(#glitch-pull); opacity: 0.95; }
-    50% { clip-path: inset(41% 0 54% 0); transform: translateX(-0.05em); filter: url(#glitch-pull); opacity: 0.95; }
-    75% { clip-path: inset(74% 0 21% 0); transform: translateX(-0.1em); filter: url(#glitch-pull); opacity: 0.95; }
+  .glitch__line:nth-child(even) .glitch__trail--right {
+    clip-path: inset(50% -12% 48.5% 82%);
   }
-
-  @keyframes glitch-pull-right {
-    0% { clip-path: inset(66% 0 28% 0); transform: translateX(0.08em); filter: url(#glitch-pull); opacity: 0.95; }
-    25% { clip-path: inset(31% 0 64% 0); transform: translateX(0.05em); filter: url(#glitch-pull); opacity: 0.95; }
-    50% { clip-path: inset(82% 0 13% 0); transform: translateX(0.12em); filter: url(#glitch-pull); opacity: 0.95; }
-    75% { clip-path: inset(47% 0 48% 0); transform: translateX(0.07em); filter: url(#glitch-pull); opacity: 0.95; }
+  .glitch.is-glitching .glitch__slice { animation: slice-burst 420ms steps(1, end); }
+  .glitch.is-glitching .glitch__slice--1 { animation-direction: reverse; }
+  .glitch.is-glitching .glitch__line:nth-child(even) .glitch__slice { animation-delay: 45ms; }
+  @keyframes slice-burst {
+    0%, 100% { transform: translateX(var(--shift)); }
+    18% { transform: translateX(calc(var(--shift) - 0.035em)); }
+    37% { transform: translateX(calc(var(--shift) + 0.055em)); }
+    53%, 79% { transform: translateX(var(--shift)); }
+    68% { transform: translateX(calc(var(--shift) - 0.02em)); }
   }
-
   @media (prefers-reduced-motion: reduce) {
-    .glitch.is-glitching .glitch__line::before,
-    .glitch.is-glitching .glitch__line::after {
-      animation: none;
-    }
+    .glitch.is-glitching .glitch__slice { animation: none; }
   }
 </style>
 
@@ -148,7 +104,6 @@ const inset = (v: number[]) => v.map((n) => `${n}%`).join(' ');
 
     const schedule = () => window.setTimeout(() => (burst(), schedule()), 9000 + Math.random() * 7000);
 
-    window.setTimeout(burst, 350);
     el.addEventListener('pointerenter', burst);
     schedule();
   }
