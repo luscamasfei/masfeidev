@@ -1,0 +1,94 @@
+---
+/**
+ * Ilustrações monocromáticas dos cartões de projeto, desenhadas em SVG para
+ * manter o grão e o contraste da referência sem depender de fotos.
+ */
+interface Props {
+  variant: 'horizon' | 'corridor';
+  class?: string;
+}
+
+const { variant, class: className } = Astro.props;
+const id = `art-${variant}`;
+
+// Colunas do corredor: distância ao ponto de fuga, do fundo para a frente.
+const columns = [24, 34, 48, 68, 96, 136, 190, 262];
+const vp = { x: 290, y: 54 };
+---
+
+<svg class={className} viewBox="0 0 580 110" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id={`${id}-stars`} x="0" y="0" width="1" height="1">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="21" />
+      <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 14 0 0 0 -10.6" />
+    </filter>
+    <filter id={`${id}-grain`} x="0" y="0" width="1" height="1">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="5" />
+      <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.6 -0.55" />
+    </filter>
+    <filter id={`${id}-rough`} x="0" y="0" width="1" height="1">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.4" numOctaves="3" seed="9" result="n" />
+      <feColorMatrix in="n" values="0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 1" />
+      <feComposite in2="SourceGraphic" operator="arithmetic" k1="1.6" k2="0" k3="0" k4="0" />
+    </filter>
+    <filter id={`${id}-glow`} x="-1" y="-1" width="3" height="3">
+      <feGaussianBlur stdDeviation="6" />
+    </filter>
+    <linearGradient id={`${id}-fade`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.75" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0.15" />
+    </linearGradient>
+    <linearGradient id={`${id}-ground`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.45" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0.08" />
+    </linearGradient>
+    <radialGradient id={`${id}-rim`} cx="0.72" cy="0.1" r="0.75">
+      <stop offset="0" stop-color="#fff" />
+      <stop offset="0.45" stop-color="#fff" stop-opacity="0.35" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="580" height="110" fill="#050505" />
+
+  {variant === 'horizon' && (
+    <g>
+      <rect width="580" height="80" filter={`url(#${id}-stars)`} opacity="0.8" />
+      <circle cx="330" cy="68" r="60" fill="#060606" />
+      <circle cx="330" cy="68" r="60" fill={`url(#${id}-rim)`} opacity="0.22" filter={`url(#${id}-rough)`} />
+      <circle cx="330" cy="68" r="59.5" fill="none" stroke={`url(#${id}-rim)`} stroke-width="2.2" />
+      <circle cx="352" cy="11" r="7" fill="#fff" filter={`url(#${id}-glow)`} />
+      <circle cx="352" cy="11" r="1.6" fill="#fff" />
+      <rect y="78" width="580" height="32" fill={`url(#${id}-ground)`} filter={`url(#${id}-rough)`} />
+      <path d="M0 78.5h580" stroke="#fff" stroke-opacity="0.4" stroke-width="0.6" />
+      <ellipse cx="300" cy="79" rx="140" ry="3" fill="#fff" opacity="0.35" filter={`url(#${id}-glow)`} />
+      <path d="M286 79 L180 110 H420 L298 79Z" fill={`url(#${id}-fade)`} opacity="0.3" filter={`url(#${id}-rough)`} />
+      <path d="M292 79 L292 110" stroke="#fff" stroke-opacity="0.25" stroke-dasharray="3 4" />
+    </g>
+  )}
+
+  {variant === 'corridor' && (
+    <g>
+      <rect x={vp.x - 22} y={vp.y - 16} width="44" height="30" fill="#fff" filter={`url(#${id}-glow)`} opacity="0.9" />
+      <rect x={vp.x - 15} y={vp.y - 11} width="30" height="22" fill="#fff" />
+      {columns.map((d) => {
+        const top = vp.y - d * 0.62;
+        const bottom = vp.y + d * 0.5;
+        const w = Math.max(1.2, d * 0.06);
+        const shade = 0.25 + (d / 262) * 0.35;
+        return (
+          <g opacity={shade}>
+            <rect x={vp.x - d - w} y={top} width={w} height={bottom - top} fill="#fff" />
+            <rect x={vp.x + d} y={top} width={w} height={bottom - top} fill="#fff" />
+            <path d={`M${vp.x - d} ${top}H${vp.x + d}`} stroke="#fff" stroke-width={w * 0.5} />
+          </g>
+        );
+      })}
+      <path d={`M0 0 L${vp.x - 15} ${vp.y - 11} M580 0 L${vp.x + 15} ${vp.y - 11} M0 110 L${vp.x - 15} ${vp.y + 11} M580 110 L${vp.x + 15} ${vp.y + 11}`} stroke="#fff" stroke-opacity="0.35" stroke-width="0.8" />
+      <path d={`M${vp.x - 15} ${vp.y + 11} L120 110 H460 L${vp.x + 15} ${vp.y + 11}Z`} fill={`url(#${id}-fade)`} opacity="0.4" filter={`url(#${id}-rough)`} />
+      <path d={`M${vp.x} ${vp.y + 11} V110`} stroke="#fff" stroke-opacity="0.3" stroke-width="2" />
+    </g>
+  )}
+
+  <rect class="art__grain" width="580" height="110" filter={`url(#${id}-grain)`} opacity="0.35" />
+</svg>

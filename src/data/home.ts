@@ -9,3 +9,9 @@ export const hero = {
   quote: ['Mesmos lugares,', 'pessoas diferentes.'],
   verbs: ['Desenvolver', 'Aprender', 'Construir', 'Evoluir'],
 } as const;
+
+export const projectsIntro = {
+  eyebrow: 'Projetos',
+  title: 'Projetos',
+  description: 'Alguns projetos que venho desenvolvendo e que colocam em prática o que estou aprendendo.',
+} as const;

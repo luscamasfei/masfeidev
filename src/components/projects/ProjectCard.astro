@@ -1,0 +1,139 @@
+---
+import ProjectArt from '@/components/projects/ProjectArt.astro';
+import { projectHref, projectNumber, type Project } from '@/lib/projects';
+
+interface Props {
+  project: Project;
+  index: number;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { project, index, headingLevel: Heading = 'h3' } = Astro.props;
+const { title, summary, technologies, art } = project.data;
+---
+
+<article class="card">
+  <p class="card__index" aria-hidden="true">// {projectNumber(index)}</p>
+  <div class="card__art">
+    <ProjectArt variant={art} class="card__svg" />
+  </div>
+  <Heading class="card__title">
+    <a href={projectHref(project)} class="card__link">{title}</a>
+  </Heading>
+  <div class="card__row">
+    <p class="card__summary">{summary}</p>
+    <svg class="card__arrow" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+      <path d="M1.5 11.5 11 2M4 1.5h7.5V9" fill="none" stroke="currentColor" stroke-width="1.2" />
+    </svg>
+  </div>
+  <ul class="card__tags" aria-label="Tecnologias">
+    {technologies.map((tech) => <li>{tech}</li>)}
+  </ul>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0.4375rem 0.6875rem 0.375rem;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    background: var(--color-void);
+    transition: border-color 0.3s;
+  }
+
+  .card:hover,
+  .card:focus-within {
+    border-color: rgb(255 255 255 / 0.5);
+  }
+
+  .card__index {
+    font-size: 0.5625rem;
+    line-height: 0.5625rem;
+    letter-spacing: 0.06em;
+    color: var(--color-ash);
+  }
+
+  .card__art {
+    margin-top: 0.0625rem;
+    aspect-ratio: 580 / 104;
+    overflow: hidden;
+  }
+
+  .card__art :global(.card__svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    filter: brightness(0.92);
+    transition: filter 0.4s, transform 0.6s var(--ease-glitch);
+  }
+
+  .card:hover .card__art :global(.card__svg) {
+    filter: brightness(1.1);
+    transform: scale(1.025);
+  }
+
+  .card__title {
+    margin-top: 0.375rem;
+    font-size: 0.78125rem;
+    font-weight: 500;
+    line-height: 1rem;
+    color: var(--color-paper);
+  }
+
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .card__link:focus-visible {
+    outline: none;
+  }
+
+  .card:has(.card__link:focus-visible) {
+    outline: 1px solid var(--color-paper);
+    outline-offset: 3px;
+  }
+
+  .card__row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.15rem;
+  }
+
+  .card__summary {
+    max-width: 17rem;
+    font-size: 0.65625rem;
+    line-height: 0.875rem;
+    color: var(--color-ash);
+  }
+
+  .card__arrow {
+    flex: none;
+    margin-bottom: 0.1rem;
+    color: var(--color-paper);
+    transition: transform 0.3s var(--ease-glitch);
+  }
+
+  .card:hover .card__arrow {
+    transform: translate(2px, -2px);
+  }
+
+  .card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .card__tags li {
+    padding: 0 0.45rem;
+    border: 1px solid rgb(255 255 255 / 0.5);
+    font-size: 0.59375rem;
+    line-height: 0.95rem;
+    color: var(--color-paper);
+  }
+</style>

@@ -1,0 +1,141 @@
+---
+import ProjectCard from '@/components/projects/ProjectCard.astro';
+import { getProjects, projectNumber } from '@/lib/projects';
+import { projectsIntro } from '@/data/home';
+
+const SLOTS = 3;
+const projects = (await getProjects()).slice(0, SLOTS);
+const openSlots = Array.from({ length: SLOTS - projects.length }, (_, i) => projects.length + i);
+---
+
+<section id="projetos" class="projects" aria-labelledby="projects-title">
+  <div class="site-container projects__frame">
+    <div class="projects__intro">
+      <p class="projects__eyebrow">// {projectsIntro.eyebrow}</p>
+      <h2 id="projects-title" class="projects__title">{projectsIntro.title}</h2>
+      <p class="projects__description">{projectsIntro.description}</p>
+    </div>
+
+    <ul class="projects__grid">
+      {projects.map((project, i) => (
+        <li><ProjectCard project={project} index={i} /></li>
+      ))}
+      {openSlots.map((i) => (
+        <li class="projects__slot" aria-hidden="true">
+          <span>// {projectNumber(i)}</span>
+          <span>Próximo projeto em construção</span>
+        </li>
+      ))}
+    </ul>
+
+    <p class="section-index projects__index" aria-hidden="true">[ 03 ]</p>
+  </div>
+</section>
+
+<style>
+  /* Reference at 1672 px: 190 px band, intro in the first 335 px, three 330 px cards. */
+  .projects {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .projects__frame {
+    position: relative;
+    display: grid;
+    grid-template-columns: 20.9375rem minmax(0, 1fr);
+    padding: 1.25rem 0 0.875rem;
+  }
+
+  .projects__intro {
+    padding-top: 0.25rem;
+  }
+
+  .projects__eyebrow {
+    margin-left: 0.1rem;
+    font-size: 0.65625rem;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .projects__title {
+    margin-top: 0.85rem;
+    font-family: var(--font-serif);
+    font-size: 2.25rem;
+    font-weight: 400;
+    line-height: 2.125rem;
+    color: var(--color-paper);
+  }
+
+  .projects__description {
+    margin-top: 1.1rem;
+    max-width: 18.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .projects__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.125rem;
+  }
+
+  .projects__grid > li {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .projects__grid > li > :global(*) {
+    flex: 1;
+  }
+
+  .projects__slot {
+    justify-content: space-between;
+    padding: 0.4375rem 0.6875rem 0.6875rem;
+    border: 1px dashed rgb(255 255 255 / 0.14);
+    font-size: 0.5625rem;
+    line-height: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--color-soot);
+  }
+
+  .projects__slot span:last-child {
+    font-size: 0.65625rem;
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
+    color: #5c5c5c;
+  }
+
+  .projects__index {
+    position: absolute;
+    top: 0.4rem;
+    right: 0;
+  }
+
+  @media (max-width: 1279px) {
+    .projects__frame {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+      padding: 2.5rem 0;
+    }
+
+    .projects__index {
+      top: 2.5rem;
+    }
+
+    .projects__grid {
+      gap: 1.25rem;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .projects__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .projects__slot {
+      min-height: 5rem;
+    }
+  }
+</style>

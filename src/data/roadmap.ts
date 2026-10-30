@@ -62,9 +62,17 @@ export const roadmapNodes: RoadmapNode[] = [
     position: { x: 60, y: 68 },
     details: {
       description: 'Primeira fase da jornada: os fundamentos da linguagem Java.',
-      // Preencher com os conteúdos estudados, os projetos (Etapa 4) e os logs (Etapa 5).
-      topics: [],
-      projects: [],
+      topics: [
+        'Tipos primitivos',
+        'Operadores',
+        'Estruturas condicionais (if e switch)',
+        'Estruturas de repetição (for)',
+      ],
+      projects: [
+        { title: 'Sistema de Contas a Pagar', href: '/projetos/contas-a-pagar/' },
+        { title: 'Maratona Java (estudos)', href: 'https://github.com/luscamasfei/maratona-java' },
+      ],
+      // Preencher com os logs na Etapa 5.
       articles: [],
     },
   },

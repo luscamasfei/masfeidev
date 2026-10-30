@@ -1,0 +1,216 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectArt from '@/components/projects/ProjectArt.astro';
+import { getProjects, projectNumber, projectStatusLabel, type Project } from '@/lib/projects';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, index) => ({ params: { slug: project.id }, props: { project, index } }));
+}
+
+interface Props {
+  project: Project;
+  index: number;
+}
+
+const { project, index } = Astro.props;
+const { title, summary, status, context, technologies, repository, demo, art, team } = project.data;
+const { Content } = await render(project);
+const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(/\/$/, '');
+---
+
+<BaseLayout title={title} description={summary}>
+  <article class="site-container project" aria-labelledby="project-title">
+    <a href="/projetos/" class="project__back">
+      <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M12 5H1.5M5.5 1l-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.1" /></svg>
+      Todos os projetos
+    </a>
+
+    <header class="project__head">
+      <p class="project__eyebrow">// Projeto {projectNumber(index)} · {context}</p>
+      <h1 id="project-title" class="project__title">{title}</h1>
+      <p class="project__summary">{summary}</p>
+    </header>
+
+    <figure class="project__art">
+      <ProjectArt variant={art} class="project__svg" />
+    </figure>
+
+    <div class="project__body">
+      <dl class="project__meta">
+        <div>
+          <dt>Status</dt>
+          <dd>{projectStatusLabel[status]}</dd>
+        </div>
+        <div>
+          <dt>Tecnologias</dt>
+          <dd>
+            <ul class="project__tags">{technologies.map((tech) => <li>{tech}</li>)}</ul>
+          </dd>
+        </div>
+        <div>
+          <dt>Repositório</dt>
+          <dd>{repository ? <a href={repository} rel="noopener">{host(repository)}</a> : 'Privado'}</dd>
+        </div>
+        <div>
+          <dt>Demonstração</dt>
+          <dd>{demo ? <a href={demo} rel="noopener">{host(demo)}</a> : 'Não disponível'}</dd>
+        </div>
+        {team.length > 0 && (
+          <div>
+            <dt>Equipe</dt>
+            <dd>
+              <ul class="project__team">
+                <li>Lucas Maffei</li>
+                {team.map((member) => (
+                  <li>{member.github ? <a href={member.github} rel="noopener">{member.name}</a> : member.name}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        )}
+      </dl>
+
+      <div class="prose-noir project__content">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .project {
+    padding: 2.5rem 0 6rem;
+  }
+
+  .project__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.6875rem;
+    color: var(--color-ash);
+    transition: color 0.2s;
+  }
+
+  .project__back:hover {
+    color: var(--color-paper);
+  }
+
+  .project__head {
+    margin-top: 2.5rem;
+    max-width: 46rem;
+  }
+
+  .project__eyebrow {
+    font-size: 0.65625rem;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .project__title {
+    margin-top: 0.85rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  .project__summary {
+    margin-top: 1rem;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    color: var(--color-ash);
+  }
+
+  .project__art {
+    margin-top: 2.5rem;
+    height: clamp(9rem, 18vw, 16rem);
+    border: 1px solid var(--color-line);
+    overflow: hidden;
+  }
+
+  .project__art :global(.project__svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* The grain is drawn for card size; at banner scale it would turn blotchy. */
+  .project__art :global(.art__grain) {
+    opacity: 0.12;
+  }
+
+  .project__body {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 44rem);
+    gap: 4rem;
+    margin-top: 3rem;
+  }
+
+  .project__meta {
+    align-self: start;
+    position: sticky;
+    top: 1.5rem;
+    display: grid;
+    gap: 1.25rem;
+    font-size: 0.75rem;
+    line-height: 1.15rem;
+  }
+
+  .project__meta > div {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .project__meta dt {
+    margin-bottom: 0.35rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-smoke);
+  }
+
+  .project__meta a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+  }
+
+  .project__meta a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .project__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .project__tags li {
+    padding: 0 0.45rem;
+    border: 1px solid rgb(255 255 255 / 0.5);
+    font-size: 0.65625rem;
+    line-height: 1.1rem;
+  }
+
+  .project__team li + li {
+    margin-top: 0.2rem;
+  }
+
+  @media (max-width: 1023px) {
+    .project__body {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+
+    .project__meta {
+      position: static;
+      grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    }
+  }
+</style>
