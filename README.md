@@ -16,3 +16,7 @@ pnpm preview   # serve o build de produção
 ```
 
 A documentação completa será adicionada conforme o projeto evolui.
+
+## Uso de IA
+
+Este projeto é desenvolvido com o auxílio do Claude Opus 5.5 (Anthropic).
