@@ -1,0 +1,11 @@
+export const hero = {
+  eyebrow: 'Desenvolvimento',
+  firstName: 'Lucas',
+  lastName: 'Maffei',
+  subtitle: 'Estudante de Sistemas de Informação',
+  description:
+    'Estudando desenvolvimento de software, explorando tecnologias e construindo projetos reais enquanto evoluo na jornada.',
+  cta: { label: 'Ver meus projetos', href: '/projetos/' },
+  quote: ['Mesmos lugares,', 'pessoas diferentes.'],
+  verbs: ['Desenvolver', 'Aprender', 'Construir', 'Evoluir'],
+} as const;

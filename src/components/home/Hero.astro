@@ -1,0 +1,370 @@
+---
+import { Picture } from 'astro:assets';
+import art from '@/assets/hero/cosmic-horizon.png';
+import GlitchText from '@/components/ui/GlitchText.astro';
+import Spark from '@/components/ui/Spark.astro';
+import { hero } from '@/data/home';
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__art" aria-hidden="true">
+    <Picture
+      src={art}
+      formats={['avif', 'webp']}
+      widths={[640, 960, 1254, 1672]}
+      sizes="(min-width: 1024px) min(90vw, 1257px), 100vw"
+      alt=""
+      loading="eager"
+      fetchpriority="high"
+      class="hero__img"
+    />
+  </div>
+
+  <div class="site-container hero__frame">
+    <div class="hero__copy">
+      <p class="hero__eyebrow"><span class="hero__cursor" aria-hidden="true"></span>// {hero.eyebrow}</p>
+
+      <div class="hero__name-wrap">
+        <span class="streak streak--a" aria-hidden="true"></span>
+        <span class="streak streak--b" aria-hidden="true"></span>
+        <span class="streak streak--c" aria-hidden="true"></span>
+        <GlitchText id="hero-title" lines={[hero.firstName, hero.lastName]} class="hero__name" />
+      </div>
+
+      <p class="hero__subtitle">{hero.subtitle}</p>
+      <p class="hero__description">{hero.description}</p>
+
+      <a href={hero.cta.href} class="hero__cta">
+        <span>{hero.cta.label}</span>
+        <svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true" class="hero__arrow">
+          <path d="M0 5h10.5M6.5 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.1" />
+        </svg>
+      </a>
+    </div>
+
+    <figure class="hero__quote">
+      <blockquote>
+        <p>“{hero.quote[0]}<br />&nbsp;{hero.quote[1]}”</p>
+      </blockquote>
+    </figure>
+
+    <ul class="hero__verbs" aria-label="Princípios">
+      {hero.verbs.map((verb) => <li>{verb}</li>)}
+      <li aria-hidden="true">//</li>
+    </ul>
+
+    <Spark size={10} class="hero__spark hero__spark--left" />
+    <Spark size={12} class="hero__spark hero__spark--right" />
+    <span class="streak streak--d" aria-hidden="true"></span>
+  </div>
+</section>
+
+<style>
+  /*
+   * Desktop geometry follows the reference at 1672 px, where the container is
+   * ~1397 px wide. Sizes tied to the artwork scale with --cw (container width)
+   * so the composition holds from 1024 px up; type keeps its measured sizes.
+   */
+  .hero {
+    --cw: min(100vw - 2.5rem, 87.5rem);
+    position: relative;
+    overflow: hidden;
+    margin-top: calc(-1 * var(--spacing-header));
+    padding-top: var(--spacing-header);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .hero__art {
+    position: absolute;
+    top: calc(var(--cw) * -0.0215);
+    left: calc((100% - var(--cw)) / 2 + var(--cw) * 0.0977);
+    width: calc(var(--cw) * 0.898);
+    pointer-events: none;
+    filter: brightness(0.8) contrast(1.04);
+    mask-image:
+      linear-gradient(to right, transparent 0%, #000 17%, #000 93%, transparent 100%),
+      linear-gradient(to bottom, transparent 0%, #000 11%);
+    mask-composite: intersect;
+  }
+
+  .hero__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hero__frame {
+    position: relative;
+    height: calc(var(--cw) * 0.2706);
+    min-height: 22rem;
+  }
+
+  .hero__copy {
+    position: relative;
+    z-index: 1;
+    padding-top: 2.375rem;
+    max-width: 22.5rem;
+  }
+
+  .hero__eyebrow {
+    position: relative;
+    margin: 0 0 0 0.1rem;
+    font-size: 0.65625rem;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .hero__cursor {
+    position: absolute;
+    left: -0.5rem;
+    top: 0.2rem;
+    width: 0.25rem;
+    height: 0.55rem;
+    background: var(--color-smoke);
+  }
+
+  .hero__name-wrap {
+    position: relative;
+    margin-top: 0.85rem;
+  }
+
+  .hero__name-wrap :global(.hero__name) {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-optical-sizing: auto;
+    font-size: 6rem;
+    line-height: 4.5625rem;
+    letter-spacing: 0;
+    color: #dedede;
+    text-shadow:
+      0 0 2.5px rgb(255 255 255 / 0.5),
+      0 0 16px rgb(255 255 255 / 0.24);
+  }
+
+  .hero__subtitle {
+    margin-top: 0.7rem;
+    font-size: 0.95625rem;
+    letter-spacing: 0;
+    line-height: 1.5rem;
+    color: var(--color-paper);
+    white-space: nowrap;
+  }
+
+  .hero__description {
+    margin-top: 0.6rem;
+    max-width: 22.25rem;
+    font-size: 0.8125rem;
+    letter-spacing: 0;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: 11.8125rem;
+    height: 1.875rem;
+    margin-top: 0.96rem;
+    padding: 0 0.75rem 0 0.7rem;
+    border: 1px solid rgb(255 255 255 / 0.72);
+    font-size: 0.65625rem;
+    color: var(--color-paper);
+    transition: background-color 0.25s, color 0.25s;
+  }
+
+  .hero__arrow {
+    transition: transform 0.3s var(--ease-glitch);
+  }
+
+  .hero__cta:hover {
+    background: var(--color-paper);
+    color: var(--color-void);
+  }
+
+  .hero__cta:hover .hero__arrow {
+    transform: translateX(3px);
+  }
+
+  .hero__quote {
+    position: absolute;
+    top: 2.6rem;
+    right: -1.4rem;
+    margin: 0;
+    font-size: 0.70625rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: #f2f2f2;
+    text-shadow: 0 0 6px rgb(0 0 0 / 0.95), 0 0 2px rgb(0 0 0 / 0.9);
+  }
+
+  .hero__quote::after {
+    content: '';
+    display: block;
+    width: 3.375rem;
+    height: 1px;
+    margin: 2rem 0.5rem 0 auto;
+    background: var(--color-line-strong);
+  }
+
+  .hero__verbs {
+    position: absolute;
+    top: 15.4rem;
+    left: calc(100% + 1.8rem);
+    padding: 0.3rem 0 0.5rem 0.9rem;
+    border-left: 1px solid var(--color-line-strong);
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .hero__verbs li:last-child {
+    margin-top: 0.1rem;
+  }
+
+  :global(.hero__spark) {
+    position: absolute;
+    color: var(--color-paper);
+    opacity: 0.9;
+  }
+
+  :global(.hero__spark--left) {
+    left: 19.1rem;
+    top: 4.6rem;
+  }
+
+  :global(.hero__spark--right) {
+    left: calc(100% + 5.1rem);
+    top: 3.2rem;
+  }
+
+  /* Horizontal tears that leak out of the name, like the still glitch of the reference. */
+  .streak {
+    position: absolute;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.55) 30%, rgb(255 255 255 / 0.55) 70%, transparent);
+  }
+
+  /* Positions are relative to the name block: line 1 baseline ~4.9rem, line 2 ~9.4rem. */
+  .streak--a {
+    left: -4.1rem;
+    top: 2.15rem;
+    width: 4.5rem;
+    opacity: 0.55;
+  }
+
+  .streak--b {
+    left: -5.4rem;
+    top: 9.35rem;
+    width: 22rem;
+    opacity: 0.35;
+    background: repeating-linear-gradient(to right, rgb(255 255 255 / 0.7) 0 14px, transparent 14px 20px);
+    mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
+  }
+
+  .streak--c {
+    left: 15.4rem;
+    top: 5.25rem;
+    width: 3.6rem;
+    opacity: 0.5;
+  }
+
+  .streak--d {
+    left: -7.6rem;
+    bottom: 0.35rem;
+    width: 7rem;
+    opacity: 0.8;
+  }
+
+  /* Elements that live in the side margins only fit on wide screens. */
+  @media (max-width: 1639px) {
+    .hero__verbs {
+      left: auto;
+      right: 0;
+    }
+
+    .hero__quote {
+      right: 0;
+    }
+
+    :global(.hero__spark--right),
+    .streak--a,
+    .streak--d {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .hero {
+      --cw: calc(100vw - 2.5rem);
+      padding-top: 0;
+    }
+
+    .hero__art {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: min(68vw, 32rem);
+      mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+    }
+
+    .hero__img {
+      height: 100%;
+      object-fit: cover;
+      object-position: 72% 30%;
+    }
+
+    .hero__frame {
+      height: auto;
+      min-height: 0;
+      margin-top: -3.5rem;
+      padding-bottom: 3.5rem;
+    }
+
+    .hero__copy {
+      padding-top: 0;
+      max-width: 34rem;
+    }
+
+    .hero__quote {
+      position: static;
+      margin-top: 2.5rem;
+    }
+
+    .hero__quote::after {
+      margin-left: 0;
+    }
+
+    .hero__verbs,
+    :global(.hero__spark),
+    .streak {
+      display: none;
+    }
+  }
+
+  @media (max-width: 479px) {
+    .hero__name-wrap :global(.hero__name) {
+      font-size: 4.25rem;
+      line-height: 3.5rem;
+    }
+
+    .hero__subtitle {
+      font-size: 0.875rem;
+      letter-spacing: 0.08em;
+      white-space: normal;
+    }
+
+    .hero__description {
+      letter-spacing: 0.12em;
+    }
+  }
+</style>

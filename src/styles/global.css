@@ -15,7 +15,7 @@
   --color-line: rgb(255 255 255 / 0.12);
   --color-line-strong: rgb(255 255 255 / 0.32);
 
-  --font-serif: 'Libre Caslon Text', 'Times New Roman', serif;
+  --font-serif: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --container-site: 87.5rem;

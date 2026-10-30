@@ -1,0 +1,120 @@
+---
+/**
+ * Monochrome glitch title driven by one SVG filter: on a few horizontal rows
+ * the glyphs are dragged sideways (left on some rows, right on others) and the
+ * rows tear slightly. At rest the drag is short, matching the still reference;
+ * a burst stretches it for half a second on load, on hover and occasionally.
+ * The burst never runs under prefers-reduced-motion.
+ */
+interface Props {
+  lines: readonly string[];
+  as?: 'h1' | 'h2' | 'p';
+  class?: string;
+  id?: string;
+}
+
+const { lines, as: Tag = 'h1', class: className, id } = Astro.props;
+const filterId = `glitch-${(id ?? lines.join('-')).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+const BURST = { dur: '0.5s', calcMode: 'discrete', begin: 'indefinite' };
+---
+
+<Tag id={id} class:list={['glitch', className]} style={`--glitch-filter: url(#${filterId})`} data-glitch={filterId}>
+  {lines.map((line) => <span class="glitch__line">{line}</span>)}
+</Tag>
+
+<svg class="glitch__defs" aria-hidden="true" focusable="false">
+  <filter id={filterId} x="-30%" y="-10%" width="160%" height="120%" color-interpolation-filters="sRGB">
+    <!-- Row pattern: thin horizontal bands; two disjoint subsets get dragged left and right. -->
+    <feTurbulence type="fractalNoise" baseFrequency="0 0.42" numOctaves="1" seed="14" result="rows"></feTurbulence>
+    <feComponentTransfer in="rows" result="rowsLeft">
+      <feFuncA type="discrete" tableValues="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0"></feFuncA>
+    </feComponentTransfer>
+    <feComponentTransfer in="rows" result="rowsRight">
+      <feFuncA type="discrete" tableValues="0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0"></feFuncA>
+    </feComponentTransfer>
+
+    <feGaussianBlur in="SourceAlpha" stdDeviation="11 0" result="blur">
+      <animate attributeName="stdDeviation" values="11 0;22 0;9 0;26 0;14 0;11 0" {...BURST}></animate>
+    </feGaussianBlur>
+
+    <feOffset in="blur" dx="-13" dy="0" result="blurLeft">
+      <animate attributeName="dx" values="-13;-32;-9;-38;-19;-13" {...BURST}></animate>
+    </feOffset>
+    <feComposite in="blurLeft" in2="rowsLeft" operator="in" result="dragLeft"></feComposite>
+
+    <feOffset in="blur" dx="13" dy="0" result="blurRight">
+      <animate attributeName="dx" values="13;28;10;34;17;13" {...BURST}></animate>
+    </feOffset>
+    <feComposite in="blurRight" in2="rowsRight" operator="in" result="dragRight"></feComposite>
+
+    <feMerge result="drag">
+      <feMergeNode in="dragLeft"></feMergeNode>
+      <feMergeNode in="dragRight"></feMergeNode>
+    </feMerge>
+    <feColorMatrix in="drag" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.9 0" result="smear"></feColorMatrix>
+
+    <!-- Row tearing: a few bands shift a little. -->
+    <feTurbulence type="fractalNoise" baseFrequency="0 0.35" numOctaves="1" seed="8" result="bands"></feTurbulence>
+    <feComponentTransfer in="bands" result="steps">
+      <feFuncR type="discrete" tableValues="0.5 0.5 0.5 0.62 0.5 0.36 0.5 0.5 0.7 0.5"></feFuncR>
+    </feComponentTransfer>
+    <feDisplacementMap in="SourceGraphic" in2="steps" scale="6" xChannelSelector="R" yChannelSelector="A" result="torn">
+      <animate attributeName="scale" values="6;18;9;22;11;6" {...BURST}></animate>
+    </feDisplacementMap>
+
+    <!-- Fine grain inside the letters. -->
+    <feTurbulence type="fractalNoise" baseFrequency="0.7 0.9" numOctaves="2" seed="3" result="grain"></feTurbulence>
+    <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.1 -0.62" result="dark"></feColorMatrix>
+    <feComposite in="dark" in2="torn" operator="in" result="darkInside"></feComposite>
+
+    <feMerge>
+      <feMergeNode in="smear"></feMergeNode>
+      <feMergeNode in="torn"></feMergeNode>
+      <feMergeNode in="darkInside"></feMergeNode>
+    </feMerge>
+  </filter>
+</svg>
+
+<style>
+  .glitch {
+    position: relative;
+    margin: 0;
+    filter: var(--glitch-filter);
+  }
+
+  .glitch__line {
+    display: block;
+    width: fit-content;
+  }
+
+  .glitch__defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  for (const el of document.querySelectorAll<HTMLElement>('[data-glitch]')) {
+    const filter = document.getElementById(el.dataset.glitch ?? '');
+    const animations = [...(filter?.querySelectorAll<SVGAnimationElement>('animate') ?? [])];
+    let busy = false;
+
+    const burst = () => {
+      if (busy || reduced.matches || document.hidden || animations.length === 0) return;
+      busy = true;
+      animations.forEach((a) => a.beginElement());
+      window.setTimeout(() => (busy = false), 600);
+    };
+
+    const schedule = () => window.setTimeout(() => (burst(), schedule()), 9000 + Math.random() * 7000);
+
+    window.setTimeout(burst, 350);
+    el.addEventListener('pointerenter', burst);
+    schedule();
+  }
+</script>
