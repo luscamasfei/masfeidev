@@ -1,0 +1,103 @@
+---
+import Spark from '@/components/ui/Spark.astro';
+import { nav, site } from '@/data/site';
+
+interface Props {
+  /** Section index shown at the right edge, e.g. "01". */
+  index?: string;
+}
+
+const { index = '01' } = Astro.props;
+const path = Astro.url.pathname;
+
+const isCurrent = (item: (typeof nav)[number]) =>
+  item.match ? path.startsWith(item.match) : path === item.href;
+---
+
+<header class="relative z-40 border-b border-line">
+  <div class="site-container grid h-header grid-cols-[1fr_auto_1fr] items-center gap-6 max-md:flex max-md:justify-between">
+    <a href="/" class="group flex items-center gap-[2.1rem] justify-self-start text-paper" aria-label={`${site.name}, página inicial`}>
+      <Spark size={14} class="transition-transform duration-500 ease-glitch group-hover:rotate-45" />
+      <span class="text-[0.75rem] tracking-[0.24em] uppercase">{site.name}</span>
+    </a>
+
+    <nav aria-label="Principal" class="max-md:hidden">
+      <ul class="flex items-center gap-[1.8rem]">
+        {
+          nav.map((item) => {
+            const current = isCurrent(item);
+            return (
+              <li>
+                <a
+                  href={item.href}
+                  aria-current={current ? 'page' : undefined}
+                  class:list={[
+                    'relative block py-2 text-[0.75rem] font-medium transition-opacity duration-200',
+                    'after:absolute after:inset-x-0 after:-bottom-px after:h-px after:origin-left after:bg-paper after:transition-transform after:duration-300',
+                    current
+                      ? 'text-paper after:scale-x-100'
+                      : 'text-paper after:scale-x-0 hover:after:scale-x-100',
+                  ]}
+                >
+                  {item.label}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-4 justify-self-end">
+      <span class="section-index max-md:hidden" aria-hidden="true">[ {index} ]</span>
+      <button
+        type="button"
+        class="text-[0.75rem] tracking-[0.18em] text-paper uppercase md:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        data-menu-toggle
+      >
+        Menu
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-nav" aria-label="Principal" class="hidden border-t border-line md:hidden" data-menu>
+    <ul class="site-container flex flex-col py-3">
+      {
+        nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={isCurrent(item) ? 'page' : undefined}
+              class:list={['block py-3 text-[0.8125rem]', isCurrent(item) ? 'text-paper' : 'text-ash']}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+
+  const setOpen = (open: boolean) => {
+    toggle?.setAttribute('aria-expanded', String(open));
+    menu?.classList.toggle('hidden', !open);
+  };
+
+  toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  menu?.addEventListener('click', (event) => {
+    if ((event.target as HTMLElement).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+</script>

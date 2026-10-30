@@ -1,0 +1,124 @@
+@import 'tailwindcss';
+
+/*
+ * Glitch Noir tokens, measured on the approved reference (1672 px wide):
+ * content spans ~1400 px, the header is 47 px tall and sections are split
+ * by hairlines. Everything is strictly monochrome.
+ */
+@theme {
+  --color-void: #040404;
+  --color-ink: #0c0c0c;
+  --color-paper: #e5e5e5;
+  --color-ash: #a3a3a3;
+  --color-smoke: #6e6e6e;
+  --color-soot: #3a3a3a;
+  --color-line: rgb(255 255 255 / 0.12);
+  --color-line-strong: rgb(255 255 255 / 0.32);
+
+  --font-serif: 'Libre Caslon Text', 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --container-site: 87.5rem;
+  --spacing-header: 2.9375rem;
+
+  --ease-glitch: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-void);
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100dvh;
+    background: var(--color-void);
+    color: var(--color-paper);
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-paper);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-paper);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .site-container {
+    width: min(100% - 2.5rem, var(--container-site));
+    margin-inline: auto;
+  }
+
+  /* Small uppercase mono labels such as "// ROADMAP". */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  /* Section index such as "[ 02 ]". */
+  .section-index {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    color: var(--color-ash);
+    white-space: pre;
+  }
+}
+
+/*
+ * Film grain over the whole page. A fixed SVG noise tile keeps it cheap;
+ * the low opacity keeps text readable.
+ */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.2 -0.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 1.2s steps(6) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    animation: none;
+  }
+}

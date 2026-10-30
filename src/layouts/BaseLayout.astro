@@ -1,0 +1,45 @@
+---
+import '@fontsource/libre-caslon-text/latin-400.css';
+import '@fontsource/libre-caslon-text/latin-700.css';
+import '@fontsource/ibm-plex-mono/latin-300.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-500.css';
+import '@/styles/global.css';
+
+import SiteHeader from '@/components/layout/SiteHeader.astro';
+import { site } from '@/data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = site.description } = Astro.props;
+const pageTitle = title ? `${title} · ${site.name}` : site.title;
+---
+
+<!doctype html>
+<html lang={site.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#040404" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <a
+      href="#conteudo"
+      class="fixed top-3 left-3 z-50 -translate-y-20 border border-line-strong bg-void px-3 py-2 text-[0.75rem] focus:translate-y-0"
+    >
+      Pular para o conteúdo
+    </a>
+    <SiteHeader />
+    <main id="conteudo">
+      <slot />
+    </main>
+    <div class="grain" aria-hidden="true"></div>
+  </body>
+</html>
