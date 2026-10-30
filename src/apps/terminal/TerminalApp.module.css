@@ -1,0 +1,78 @@
+/* Ghostty: JetBrains Mono 13px, background #0a0a0a at 95%, cursor #ffffff. */
+.terminal {
+  height: 100%;
+  overflow-y: auto;
+  padding: 8px 10px;
+  color: #f2f2f2;
+  cursor: text;
+  overflow-wrap: anywhere;
+}
+
+.entry {
+  margin-bottom: 2px;
+}
+
+.prompt {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  color: #f2f2f2;
+  white-space: pre;
+}
+
+.prompt svg {
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.prompt svg:first-child {
+  margin-left: 2px;
+}
+
+.path {
+  color: #f2f2f2;
+}
+
+.charOk,
+.charErr {
+  margin-right: 1ch;
+}
+
+.charOk {
+  color: #d0d0d0;
+}
+
+.charErr {
+  color: #e6e6e6;
+}
+
+.error {
+  color: #ffffff;
+}
+
+.muted {
+  color: #a8a8a8;
+}
+
+.hl {
+  color: #ffffff;
+}
+
+.inputLine {
+  display: flex;
+  align-items: baseline;
+}
+
+.input {
+  flex: 1;
+  min-width: 4ch;
+  padding: 0;
+  background: none;
+  border: 0;
+  outline: none;
+  caret-color: #ffffff;
+}
+
+.input:focus-visible {
+  outline: none;
+}

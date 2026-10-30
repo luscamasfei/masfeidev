@@ -1,0 +1,56 @@
+/*
+ * Design tokens copied from the reference desktop:
+ *   colors  -> ~/.config/colors/colors.css ("paleta monocromática", preto e branco)
+ *   windows -> Hyprland appearance.conf (border 2px, rounding 2, gaps 5/2)
+ *   motion  -> Hyprland animation.conf ("overshot" and "ease" bezier curves)
+ *   bar     -> Waybar style.css (JetBrains Mono, 13px, bold, 95% background)
+ * The desktop has a single dark theme, so there is no light variant.
+ */
+:root {
+  color-scheme: dark;
+
+  --fundo: #0a0a0a;
+  --fundo-elevado: #1c1c1c;
+  --fundo-hover: #262626;
+  --texto: #f2f2f2;
+  --texto-secundario: #a8a8a8;
+  --texto-apagado: #8a8a8a;
+  --destaque: #ffffff;
+  --destaque-forte: #3a3a3a;
+  --sucesso: #d0d0d0;
+  --aviso: #bdbdbd;
+  --erro: #e6e6e6;
+
+  --wallpaper-base: #0a0a0a;
+  /* Vertical crop of the wallpaper: lower % shows more of the top (image moves down). */
+  --wallpaper-y: 50%;
+
+  --bar-bg: rgb(10 10 10 / 0.95);
+  --window-bg: rgb(10 10 10 / 0.95);
+  --surface-glass: rgb(10 10 10 / 0.88);
+  --border-active: var(--destaque);
+  --border-inactive: rgb(28 28 28 / 0.67);
+  --shadow: 0 2px 8px rgb(10 10 10 / 0.93);
+
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-size: 13px;
+
+  --bar-height: 26px;
+  --gap-out: 5px;
+  --gap-in: 2px;
+  --border-width: 2px;
+  --radius: 2px;
+  --radius-ui: 5px;
+
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-overshot: cubic-bezier(0.13, 0.99, 0.29, 1.05);
+  --duration: 0.25s;
+
+  --focus-ring: 0 0 0 2px var(--destaque);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration: 0s;
+  }
+}

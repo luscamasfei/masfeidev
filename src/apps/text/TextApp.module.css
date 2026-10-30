@@ -1,0 +1,32 @@
+.viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.path {
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--fundo-elevado);
+  color: var(--texto-secundario);
+  font-size: 12px;
+}
+
+.content {
+  flex: 1;
+  margin: 0;
+  padding: 12px 16px;
+  overflow: auto;
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  padding: 12px 16px;
+  color: var(--erro);
+}
+
+.empty {
+  padding: 12px 16px;
+  color: var(--texto-secundario);
+}

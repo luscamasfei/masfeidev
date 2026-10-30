@@ -1,0 +1,192 @@
+/* Window frame following Hyprland: 2px border, accent when focused, rounding 2, blur, shadow. */
+.window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--window-bg);
+  backdrop-filter: blur(6px);
+  border: var(--border-width) solid var(--border-inactive);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  outline: none;
+  transition: border-color 0.2s var(--ease);
+  animation: window-in 0.35s var(--ease-overshot);
+}
+
+.window[hidden] {
+  display: none;
+}
+
+.focused {
+  border-color: var(--border-active);
+}
+
+.filled {
+  border-radius: 0;
+}
+
+.dragging {
+  user-select: none;
+  will-change: left, top, width, height;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  flex-shrink: 0;
+  padding: 0 4px 0 10px;
+  background: var(--fundo);
+  border-bottom: 1px solid var(--fundo-elevado);
+  cursor: default;
+  touch-action: none;
+  user-select: none;
+}
+
+.appIcon {
+  color: var(--destaque);
+  flex-shrink: 0;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--texto-secundario);
+}
+
+.focused .title {
+  color: var(--texto);
+}
+
+.controls {
+  display: flex;
+  gap: 2px;
+}
+
+.control {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  border-radius: var(--radius-ui);
+  color: var(--texto-secundario);
+}
+
+.control:hover {
+  background: var(--fundo-elevado);
+  color: var(--texto);
+}
+
+.close:hover {
+  background: var(--destaque-forte);
+}
+
+.body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.loading {
+  padding: 16px;
+  color: var(--texto-secundario);
+}
+
+.crash {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.crash code {
+  color: var(--erro);
+  white-space: pre-wrap;
+}
+
+.crash button {
+  margin-right: 8px;
+  padding: 4px 12px;
+  border: 1px solid var(--destaque);
+  border-radius: var(--radius-ui);
+}
+
+/* Invisible resize handles on every edge (resize_on_border = true). */
+.handle {
+  position: absolute;
+  z-index: 2;
+  touch-action: none;
+}
+
+.h_n,
+.h_s {
+  left: 8px;
+  right: 8px;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.h_e,
+.h_w {
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.h_n {
+  top: -2px;
+}
+.h_s {
+  bottom: -2px;
+}
+.h_e {
+  right: -2px;
+}
+.h_w {
+  left: -2px;
+}
+
+.h_ne,
+.h_nw,
+.h_se,
+.h_sw {
+  width: 12px;
+  height: 12px;
+}
+
+.h_ne {
+  top: -2px;
+  right: -2px;
+  cursor: nesw-resize;
+}
+.h_sw {
+  bottom: -2px;
+  left: -2px;
+  cursor: nesw-resize;
+}
+.h_nw {
+  top: -2px;
+  left: -2px;
+  cursor: nwse-resize;
+}
+.h_se {
+  bottom: -2px;
+  right: -2px;
+  cursor: nwse-resize;
+}
+
+@keyframes window-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}

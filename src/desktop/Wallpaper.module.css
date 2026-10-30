@@ -1,0 +1,21 @@
+.wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  background: var(--wallpaper-base);
+  pointer-events: none;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center var(--wallpaper-y);
+}
+
+.solid {
+  background:
+    radial-gradient(ellipse at 70% 20%, rgb(255 255 255 / 0.08), transparent 60%),
+    linear-gradient(160deg, var(--wallpaper-base), #1c1c1c);
+}

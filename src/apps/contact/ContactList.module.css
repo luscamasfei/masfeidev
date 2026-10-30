@@ -1,0 +1,46 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--fundo-elevado);
+  border-radius: var(--radius-ui);
+  margin-bottom: 8px;
+}
+
+.label {
+  min-width: 9ch;
+  color: var(--destaque);
+  font-weight: 700;
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--texto);
+}
+
+a.value:hover {
+  color: var(--destaque);
+}
+
+.copy {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-ui);
+  color: var(--texto-secundario);
+}
+
+.copy:hover {
+  background: var(--fundo-elevado);
+  color: var(--texto);
+}

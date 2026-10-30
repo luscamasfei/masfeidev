@@ -1,0 +1,16 @@
+.stage,
+.ghostHost,
+.ghostHost > * {
+  position: absolute;
+  inset: 0;
+}
+
+.ghostHost {
+  pointer-events: none;
+}
+
+/* The copy is a frozen picture: no window pop-in or hover transitions replaying. */
+.ghostHost * {
+  animation: none !important;
+  transition: none !important;
+}

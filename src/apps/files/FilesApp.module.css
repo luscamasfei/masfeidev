@@ -1,0 +1,257 @@
+.files {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--fundo-elevado);
+}
+
+.tool {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 28px;
+  border-radius: var(--radius-ui);
+  color: var(--texto);
+}
+
+.tool:hover:not(:disabled) {
+  background: var(--fundo-elevado);
+}
+
+.tool:disabled {
+  color: var(--texto-apagado);
+  cursor: default;
+}
+
+.tool[aria-pressed='true'] {
+  color: var(--destaque);
+  box-shadow: inset 0 -2px 0 var(--destaque);
+}
+
+.crumbs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  margin: 0 4px;
+  padding: 0 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  background: var(--fundo-elevado);
+  border-radius: var(--radius-ui);
+  scrollbar-width: none;
+}
+
+.crumbPart {
+  display: inline-flex;
+  align-items: center;
+}
+
+.crumb {
+  padding: 0 4px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+.crumb:hover {
+  color: var(--destaque);
+}
+
+.crumb[aria-current] {
+  color: var(--destaque);
+}
+
+.sep {
+  color: var(--texto-apagado);
+}
+
+.viewToggle {
+  display: flex;
+  gap: 2px;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.sidebar {
+  width: 168px;
+  flex-shrink: 0;
+  padding: 6px;
+  overflow-y: auto;
+  border-right: 1px solid var(--fundo-elevado);
+}
+
+.place {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 30px;
+  padding: 0 8px;
+  border-radius: var(--radius-ui);
+  text-align: left;
+}
+
+.place svg {
+  color: var(--destaque);
+  flex-shrink: 0;
+}
+
+.place:hover {
+  background: var(--fundo-elevado);
+}
+
+.placeActive {
+  background: var(--destaque-forte);
+}
+
+.placeActive svg {
+  color: var(--texto);
+}
+
+.grid {
+  flex: 1;
+  align-content: start;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 6px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px;
+  overflow-y: auto;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px 8px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-ui);
+  text-align: center;
+}
+
+.tile .name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.listHeader,
+.row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.2fr) 120px 2fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.listHeader {
+  padding: 4px 10px;
+  color: var(--texto-secundario);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.listHeader span:first-child {
+  padding-left: 25px;
+}
+
+.row {
+  grid-template-columns: 15px minmax(126px, 1.2fr) 120px 2fr;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-ui);
+  text-align: left;
+}
+
+.tile:hover,
+.row:hover {
+  background: var(--fundo-elevado);
+}
+
+.selected,
+.selected:hover {
+  background: var(--destaque-forte);
+  border-color: var(--destaque);
+}
+
+.itemIcon {
+  color: var(--destaque);
+}
+
+.selected .itemIcon {
+  color: var(--texto);
+}
+
+.name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  color: var(--texto-secundario);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.selected .meta {
+  color: var(--texto);
+}
+
+.empty {
+  color: var(--texto-secundario);
+  padding: 10px;
+}
+
+.status {
+  padding: 3px 10px;
+  border-top: 1px solid var(--fundo-elevado);
+  color: var(--texto-secundario);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: 15px 1fr 100px;
+  }
+
+  .row .meta:last-child,
+  .listHeader span:last-child {
+    display: none;
+  }
+
+  .listHeader {
+    grid-template-columns: 1fr 100px;
+  }
+}

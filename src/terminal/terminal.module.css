@@ -1,0 +1,19 @@
+/* Output colors from ~/.config/ghostty/themes/monocromatico. */
+.accent {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.muted {
+  color: #a8a8a8;
+}
+
+.table {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 2ch;
+}
+
+.row {
+  display: contents;
+}
