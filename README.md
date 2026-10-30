@@ -17,6 +17,6 @@ pnpm preview   # serve o build de produção
 
 A documentação completa será adicionada conforme o projeto evolui.
 
-## Uso de IA
+## Uso de Inteligência Artificial
 
-Este projeto é desenvolvido com o auxílio do Claude Opus 5.5 (Anthropic).
+Este projeto foi desenvolvido por Lucas Maffei com o auxílio do OpenAI Codex durante etapas de implementação, revisão e aprimoramento do código. As decisões sobre identidade visual, funcionalidades e direcionamento do projeto foram conduzidas pelo autor.
