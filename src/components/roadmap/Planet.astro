@@ -1,0 +1,51 @@
+---
+/**
+ * Horizonte de planeta que desponta sob o mapa. Só o topo do disco fica
+ * visível, então o filtro de relevo é calculado apenas nessa faixa.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<svg class={className} viewBox="0 0 1000 1000" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="planet-surface" x="0" y="0" width="1" height="0.1" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.05" numOctaves="5" seed="11" result="relief" />
+      <feComponentTransfer in="relief" result="maria">
+        <feFuncR type="linear" slope="5" intercept="-1.9" />
+        <feFuncG type="linear" slope="5" intercept="-1.9" />
+        <feFuncB type="linear" slope="5" intercept="-1.9" />
+      </feComponentTransfer>
+      <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" seed="4" result="grit" />
+      <feComponentTransfer in="grit" result="speckle">
+        <feFuncR type="linear" slope="3.6" intercept="-1.25" />
+        <feFuncG type="linear" slope="3.6" intercept="-1.25" />
+        <feFuncB type="linear" slope="3.6" intercept="-1.25" />
+      </feComponentTransfer>
+      <feComposite in="speckle" in2="maria" operator="arithmetic" k1="0.85" k2="0.5" k3="0.05" k4="0" />
+      <feColorMatrix values="0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 1" />
+      <feComposite in2="SourceGraphic" operator="in" />
+    </filter>
+    <linearGradient id="planet-depth" x1="0" y1="0" x2="0" y2="0.1">
+      <stop offset="0" stop-color="#000" stop-opacity="0" />
+      <stop offset="0.3" stop-color="#000" stop-opacity="0.05" />
+      <stop offset="1" stop-color="#000" stop-opacity="0.75" />
+    </linearGradient>
+    <radialGradient id="planet-light" cx="0.5" cy="0" r="0.5">
+      <stop offset="0.35" stop-color="#000" stop-opacity="0" />
+      <stop offset="1" stop-color="#000" stop-opacity="0.75" />
+    </radialGradient>
+    <clipPath id="planet-cap">
+      <rect width="1000" height="100" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#planet-cap)">
+    <circle cx="500" cy="500" r="500" fill="#fff" filter="url(#planet-surface)" />
+    <circle cx="500" cy="500" r="499" fill="none" stroke="#fff" stroke-width="2.5" stroke-opacity="0.55" filter="url(#planet-surface)" />
+    <circle cx="500" cy="500" r="500" fill="url(#planet-depth)" />
+    <circle cx="500" cy="500" r="500" fill="url(#planet-light)" />
+  </g>
+</svg>

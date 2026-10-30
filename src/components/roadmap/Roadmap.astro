@@ -1,0 +1,673 @@
+---
+import Planet from '@/components/roadmap/Planet.astro';
+import RoadmapIcon from '@/components/roadmap/RoadmapIcon.astro';
+import {
+  roadmapConnections,
+  roadmapIntro,
+  roadmapNodes,
+  roadmapStatusLabel,
+  type RoadmapNode,
+} from '@/data/roadmap';
+
+// Plano do mapa desktop, medido na referência a 1672 px.
+const MAP_W = 1017;
+const MAP_H = 204;
+// No mobile cada fase ocupa uma faixa de 100 unidades num caminho vertical.
+const STEP = 100;
+
+const index = new Map(roadmapNodes.map((node, i) => [node.id, i]));
+const narrowPoint = (i: number) => ({ x: i % 2 === 0 ? 32 : 68, y: i * STEP + STEP / 2 });
+const narrowH = roadmapNodes.length * STEP;
+
+const links = roadmapConnections.flatMap(({ from, to, bend = 0 }) => {
+  const a = index.get(from);
+  const b = index.get(to);
+  if (a === undefined || b === undefined) return [];
+  const p = roadmapNodes[a].position;
+  const q = roadmapNodes[b].position;
+  const dx = (q.x - p.x) * 0.45;
+  const m = narrowPoint(a);
+  const n = narrowPoint(b);
+  const dy = (n.y - m.y) * 0.5;
+  return [{
+    wide: `M${p.x} ${p.y}C${p.x + dx} ${p.y + bend} ${q.x - dx} ${q.y + bend} ${q.x} ${q.y}`,
+    narrow: `M${m.x} ${m.y}C${m.x} ${m.y + dy} ${n.x} ${n.y - dy} ${n.x} ${n.y}`,
+  }];
+});
+
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+const nodeStyle = (node: RoadmapNode, i: number) => {
+  const narrow = narrowPoint(i);
+  return [
+    `--x: ${node.position.x}`,
+    `--y: ${node.position.y}`,
+    `--nx: ${narrow.x}%`,
+    `--ny: ${(narrow.y / narrowH) * 100}%`,
+  ].join('; ');
+};
+---
+
+<section id="roadmap" class="roadmap" aria-labelledby="roadmap-title">
+  <div class="site-container roadmap__frame">
+    <div class="roadmap__intro">
+      <p class="roadmap__eyebrow">// {roadmapIntro.eyebrow}</p>
+      <h2 id="roadmap-title" class="roadmap__title">
+        <span class="roadmap__title-line">{roadmapIntro.title[0]}<span class="roadmap__tear" aria-hidden="true"></span></span>
+        <span class="roadmap__title-line">{roadmapIntro.title[1]}</span>
+      </h2>
+      <p class="roadmap__description">{roadmapIntro.description}</p>
+    </div>
+
+    <div class="roadmap__map" style={`--narrow-h: ${roadmapNodes.length}`}>
+      <div class="roadmap__horizon" aria-hidden="true">
+        <Planet class="roadmap__planet" />
+      </div>
+
+      <svg class="roadmap__paths roadmap__paths--wide" viewBox={`0 0 ${MAP_W} ${MAP_H}`} aria-hidden="true" focusable="false">
+        {links.map((link) => <path d={link.wide} />)}
+      </svg>
+      <svg class="roadmap__paths roadmap__paths--narrow" viewBox={`0 0 100 ${narrowH}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        {links.map((link) => <path d={link.narrow} />)}
+      </svg>
+
+      <ol class="roadmap__nodes" aria-label="Fases do roadmap">
+        {roadmapNodes.map((node, i) => {
+          const status = roadmapStatusLabel[node.status];
+          const body = (
+            <>
+              <span class="node__ring"><RoadmapIcon name={node.icon} class="node__icon" /></span>
+              <span class="node__tag" aria-hidden="true">{pad(i)}</span>
+              <span class="node__label">
+                <span class="sr-only">Fase {pad(i)}: </span>
+                {node.title && <span class="node__title">{node.title}</span>}
+                <span class="node__status">{status}</span>
+              </span>
+            </>
+          );
+          return (
+            <li class:list={['node', `node--${node.status}`]} style={nodeStyle(node, i)}>
+              {node.details ? (
+                <button type="button" class="node__body" aria-expanded="false" aria-controls={`roadmap-panel-${node.id}`} data-roadmap-trigger={node.id}>
+                  {body}
+                </button>
+              ) : (
+                <div class="node__body">{body}</div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+
+      {roadmapNodes.map((node, i) => node.details && (
+        <aside id={`roadmap-panel-${node.id}`} class="panel" style={nodeStyle(node, i)} aria-labelledby={`roadmap-panel-title-${node.id}`} data-roadmap-panel={node.id} hidden>
+          <header class="panel__head">
+            <p class="panel__index">// Fase {pad(i)}</p>
+            <button type="button" class="panel__close" data-roadmap-close>
+              Fechar
+              <svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><path d="M1 1l7 7M8 1 1 8" stroke="currentColor" stroke-width="1.1" /></svg>
+            </button>
+          </header>
+          <h3 id={`roadmap-panel-title-${node.id}`} class="panel__title">{node.title}</h3>
+          <p class="panel__status">{roadmapStatusLabel[node.status]}</p>
+          <p class="panel__description">{node.details.description}</p>
+
+          <div class="panel__group">
+            <h4 class="panel__heading">Conteúdos estudados</h4>
+            {node.details.topics.length > 0
+              ? <ul class="panel__list">{node.details.topics.map((topic) => <li>{topic}</li>)}</ul>
+              : <p class="panel__empty">Lista em preparação.</p>}
+          </div>
+          <div class="panel__group">
+            <h4 class="panel__heading">Projetos relacionados</h4>
+            {node.details.projects.length > 0
+              ? <ul class="panel__list">{node.details.projects.map((item) => <li><a href={item.href}>{item.title}</a></li>)}</ul>
+              : <p class="panel__empty">Nenhum projeto publicado ainda.</p>}
+          </div>
+          <div class="panel__group">
+            <h4 class="panel__heading">Artigos relacionados</h4>
+            {node.details.articles.length > 0
+              ? <ul class="panel__list">{node.details.articles.map((item) => <li><a href={item.href}>{item.title}</a></li>)}</ul>
+              : <p class="panel__empty">Nenhum artigo publicado ainda.</p>}
+          </div>
+        </aside>
+      ))}
+    </div>
+
+    <p class="section-index roadmap__index" aria-hidden="true">[ 02 ]</p>
+  </div>
+  <span class="roadmap__streak roadmap__streak--left" aria-hidden="true"></span>
+  <span class="roadmap__streak roadmap__streak--right" aria-hidden="true"></span>
+</section>
+
+<style>
+  /*
+   * Desktop geometry follows the reference at 1672 px: a 204 px band with the
+   * intro in the first 380 px and the map in the remaining 1017 px. Node
+   * centres are stored in that 1017 × 204 plane and scaled with the map width.
+   */
+  .roadmap {
+    position: relative;
+    z-index: 2;
+    scroll-margin-top: 1rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .roadmap__frame {
+    position: relative;
+    display: grid;
+    grid-template-columns: 23.75rem minmax(0, 1fr);
+    min-height: 12.75rem;
+  }
+
+  .roadmap__intro {
+    padding: 1.15rem 0 1.5rem;
+  }
+
+  .roadmap__eyebrow {
+    margin-left: 0.1rem;
+    font-size: 0.65625rem;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .roadmap__title {
+    margin-top: 0.7rem;
+    font-family: var(--font-serif);
+    font-size: 2.25rem;
+    font-weight: 400;
+    line-height: 2.125rem;
+    letter-spacing: -0.005em;
+    color: var(--color-paper);
+  }
+
+  .roadmap__title-line {
+    position: relative;
+    display: block;
+    width: fit-content;
+  }
+
+  /* Static scanline tear beside "Minha", as in the reference. */
+  .roadmap__tear {
+    position: absolute;
+    top: 0.42em;
+    left: calc(100% + 0.6rem);
+    width: 6.25rem;
+    height: 0.6rem;
+    opacity: 0.6;
+    background:
+      linear-gradient(to right, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.5) 60%, transparent) 0 0 / 100% 1px no-repeat,
+      linear-gradient(to right, transparent 4%, rgb(255 255 255 / 0.7) 20%, rgb(255 255 255 / 0.35) 75%, transparent) 0 4px / 88% 1px no-repeat,
+      linear-gradient(to right, rgb(255 255 255 / 0.5), transparent 70%) 6px 8px / 70% 1px no-repeat;
+  }
+
+  .roadmap__description {
+    margin-top: 0.85rem;
+    max-width: 17.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .roadmap__index {
+    position: absolute;
+    top: 1.1rem;
+    right: 0;
+  }
+
+  .roadmap__map {
+    --s: calc(100cqw / 1017);
+    position: relative;
+    container-type: inline-size;
+  }
+
+  .roadmap__horizon {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .roadmap__horizon :global(.roadmap__planet) {
+    position: absolute;
+    left: -10.8%;
+    bottom: 0;
+    width: 92.4%;
+    height: auto;
+    transform: translateY(93.6%);
+  }
+
+  .roadmap__paths {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: none;
+    stroke: rgb(255 255 255 / 0.4);
+    stroke-width: 1.2;
+    stroke-dasharray: 6 5;
+  }
+
+  .roadmap__paths--narrow {
+    display: none;
+  }
+
+  .roadmap__nodes {
+    position: absolute;
+    inset: 0;
+  }
+
+  .node {
+    position: absolute;
+    left: calc(var(--x) / 1017 * 100%);
+    top: calc(50% + (var(--y) - 102) * var(--s));
+    width: 3.5rem;
+    height: 3.5rem;
+    translate: -50% -50%;
+  }
+
+  .node__body {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+  }
+
+  button.node__body {
+    cursor: pointer;
+  }
+
+  .node__ring {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 1.5px solid #4e4e4e;
+    border-radius: 50%;
+    background: var(--color-void);
+    color: #666;
+    transition: border-color 0.3s, box-shadow 0.3s, color 0.3s;
+  }
+
+  .node__ring :global(.node__icon) {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+
+  /* Number flag joined to the ring by a short diagonal stem. */
+  .node__tag {
+    position: absolute;
+    left: calc(100% - 0.1rem);
+    top: -0.95rem;
+    min-width: 1.05rem;
+    padding: 0 0.22rem;
+    font-size: 0.625rem;
+    line-height: 0.9rem;
+    text-align: center;
+    background: #444;
+    color: #8f8f8f;
+  }
+
+  .node__tag::before {
+    content: '';
+    position: absolute;
+    left: -0.42rem;
+    top: calc(100% + 0.05rem);
+    width: 0.6rem;
+    height: 1px;
+    background: #444;
+    rotate: -45deg;
+    transform-origin: right center;
+  }
+
+  .node__label {
+    position: absolute;
+    top: calc(100% + 0.7rem);
+    left: 50%;
+    translate: -50% 0;
+    display: grid;
+    white-space: nowrap;
+  }
+
+  .node__title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1rem;
+    color: var(--color-paper);
+  }
+
+  .node__status {
+    font-size: 0.65625rem;
+    letter-spacing: 0.03em;
+    line-height: 1rem;
+    color: #5c5c5c;
+  }
+
+  .node--building .node__status {
+    text-transform: lowercase;
+  }
+
+  .node--in-progress {
+    width: 3.625rem;
+    height: 3.625rem;
+  }
+
+  .node--in-progress .node__ring {
+    border: 2px solid var(--color-paper);
+    color: var(--color-paper);
+  }
+
+  .node--in-progress .node__ring :global(.node__icon) {
+    width: 1.875rem;
+    height: 1.875rem;
+  }
+
+  .node--in-progress .node__tag,
+  .node--in-progress .node__tag::before {
+    background: var(--color-paper);
+    color: var(--color-void);
+  }
+
+  .node--in-progress .node__tag::before {
+    height: 2px;
+  }
+
+  .node--in-progress .node__label {
+    top: calc(100% + 0.55rem);
+  }
+
+  .node--in-progress .node__status {
+    color: var(--color-ash);
+  }
+
+  button.node__body:hover .node__ring,
+  button.node__body[aria-expanded='true'] .node__ring {
+    box-shadow: 0 0 0 0.3rem var(--color-void), 0 0 0 calc(0.3rem + 1px) rgb(255 255 255 / 0.4);
+  }
+
+  button.node__body:focus-visible {
+    outline: none;
+  }
+
+  button.node__body:focus-visible .node__ring {
+    box-shadow: 0 0 0 0.3rem var(--color-void), 0 0 0 calc(0.3rem + 1px) var(--color-paper);
+  }
+
+  .panel {
+    position: absolute;
+    z-index: 5;
+    top: 0.75rem;
+    left: calc(var(--x) / 1017 * 100% + 3rem);
+    width: min(25rem, 100% - 5rem);
+    padding: 1rem 1.15rem 1.15rem;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-void);
+    animation: panel-in 0.28s var(--ease-glitch);
+  }
+
+  .panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel__index,
+  .panel__heading {
+    font-size: 0.625rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-smoke);
+  }
+
+  .panel__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.2rem 0;
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ash);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .panel__close:hover {
+    color: var(--color-paper);
+  }
+
+  .panel__title {
+    margin-top: 0.6rem;
+    font-family: var(--font-serif);
+    font-size: 1.625rem;
+    font-weight: 400;
+    line-height: 1.75rem;
+  }
+
+  .panel__status {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .panel__description {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1.15rem;
+    color: var(--color-paper);
+  }
+
+  .panel__group {
+    margin-top: 0.9rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .panel__list,
+  .panel__empty {
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    line-height: 1.15rem;
+  }
+
+  .panel__list li::before {
+    content: '— ';
+    color: var(--color-smoke);
+  }
+
+  .panel__list a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 3px;
+  }
+
+  .panel__list a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .panel__empty {
+    color: var(--color-smoke);
+  }
+
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      translate: 0 0.35rem;
+    }
+  }
+
+  .roadmap__streak {
+    position: absolute;
+    top: 80%;
+    width: 4.75rem;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.45) 35%, rgb(255 255 255 / 0.45) 65%, transparent);
+  }
+
+  .roadmap__streak--left {
+    left: 1.6rem;
+  }
+
+  .roadmap__streak--right {
+    right: 2rem;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1639px) {
+    .roadmap__streak {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1279px) {
+    .roadmap__frame {
+      grid-template-columns: 19.5rem minmax(0, 1fr);
+    }
+  }
+
+  /*
+   * Below 1024 px the map turns into a vertical trail: phases zig-zag down the
+   * page and the panel becomes a bottom sheet.
+   */
+  @media (max-width: 1023px) {
+    .roadmap__frame {
+      grid-template-columns: 1fr;
+    }
+
+    .roadmap__intro {
+      padding: 2.5rem 0 1rem;
+    }
+
+    .roadmap__index {
+      top: 2.5rem;
+    }
+
+    .roadmap__map {
+      height: calc(var(--narrow-h) * 8.5rem);
+      max-width: 30rem;
+      width: 100%;
+      margin-inline: auto;
+    }
+
+    .roadmap__horizon :global(.roadmap__planet) {
+      left: -60%;
+      width: 220%;
+      transform: translateY(97%);
+    }
+
+    .roadmap__paths--wide {
+      display: none;
+    }
+
+    .roadmap__paths--narrow {
+      display: block;
+    }
+
+    .roadmap__paths--narrow path {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .roadmap__nodes {
+      z-index: 1;
+    }
+
+    .node {
+      left: var(--nx);
+      top: var(--ny);
+    }
+
+    /* Keep the trail from running through the labels. */
+    .node__label {
+      padding: 0.15rem 0.4rem;
+      background: var(--color-void);
+    }
+
+    .panel {
+      position: fixed;
+      z-index: 55;
+      inset: auto 0 0;
+      width: auto;
+      max-height: 78dvh;
+      overflow-y: auto;
+      padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
+      border-width: 1px 0 0;
+      animation-name: sheet-in;
+    }
+
+    @keyframes sheet-in {
+      from {
+        translate: 0 100%;
+      }
+    }
+  }
+</style>
+
+<script>
+  const panels = new Map<string, HTMLElement>();
+  for (const panel of document.querySelectorAll<HTMLElement>('[data-roadmap-panel]')) {
+    panels.set(panel.dataset.roadmapPanel!, panel);
+  }
+  const triggers = [...document.querySelectorAll<HTMLButtonElement>('[data-roadmap-trigger]')];
+  let openId: string | null = null;
+
+  const close = (restoreFocus = false) => {
+    if (!openId) return;
+    const trigger = triggers.find((t) => t.dataset.roadmapTrigger === openId);
+    panels.get(openId)!.hidden = true;
+    trigger?.setAttribute('aria-expanded', 'false');
+    openId = null;
+    if (restoreFocus) trigger?.focus();
+  };
+
+  const open = (id: string) => {
+    close();
+    const panel = panels.get(id);
+    if (!panel) return;
+    panel.hidden = false;
+    triggers.find((t) => t.dataset.roadmapTrigger === id)?.setAttribute('aria-expanded', 'true');
+    openId = id;
+    panel.querySelector<HTMLElement>('[data-roadmap-close]')?.focus({ preventScroll: true });
+  };
+
+  for (const trigger of triggers) {
+    trigger.addEventListener('click', () => {
+      const id = trigger.dataset.roadmapTrigger!;
+      if (openId === id) close();
+      else open(id);
+    });
+  }
+
+  for (const button of document.querySelectorAll('[data-roadmap-close]')) {
+    button.addEventListener('click', () => close(true));
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && openId) close(true);
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!openId) return;
+    const target = event.target as Node;
+    const trigger = triggers.find((t) => t.dataset.roadmapTrigger === openId);
+    if (!panels.get(openId)!.contains(target) && !trigger?.contains(target)) close();
+  });
+</script>
