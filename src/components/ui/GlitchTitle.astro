@@ -1,7 +1,6 @@
 ---
 /**
- * Título visual extraído da referência original.
- * Coloque lucas-maffei-glitch.png em public/images/.
+ * Título animado fornecido pelo autor, com versão estática para movimento reduzido.
  */
 interface Props {
   class?: string;
@@ -12,16 +11,19 @@ const { class: className = '', id } = Astro.props;
 
 <h1 id={id} class:list={['glitch-title', className]}>
   <span class="sr-only">Lucas Maffei</span>
-  <img
-    src="/images/lucas-maffei-glitch.png"
-    alt=""
-    aria-hidden="true"
-    width="315"
-    height="157"
-    draggable="false"
-    decoding="async"
-    fetchpriority="high"
-  />
+  <picture>
+    <source media="(prefers-reduced-motion: reduce)" srcset="/images/lucas-maffei-glitch.png" />
+    <img
+      src="/images/download.gif"
+      alt=""
+      aria-hidden="true"
+      width="315"
+      height="157"
+      draggable="false"
+      decoding="async"
+      fetchpriority="high"
+    />
+  </picture>
 </h1>
 
 <style>
@@ -35,8 +37,13 @@ const { class: className = '', id } = Astro.props;
     display: block;
     width: 100%;
     height: auto;
-    /* Preto desaparece sobre a arte, e o glitch branco permanece original. */
+    /* Neutralize the near-black texture before blending it into the Hero. */
+    filter: contrast(1.2);
     mix-blend-mode: screen;
+    mask-image:
+      linear-gradient(to right, transparent, #000 3%, #000 97%, transparent),
+      linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+    mask-composite: intersect;
     user-select: none;
     pointer-events: none;
   }
