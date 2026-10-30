@@ -1,0 +1,54 @@
+---
+/**
+ * Título visual extraído da referência original.
+ * Coloque lucas-maffei-glitch.png em public/images/.
+ */
+interface Props {
+  class?: string;
+  id?: string;
+}
+const { class: className = '', id } = Astro.props;
+---
+
+<h1 id={id} class:list={['glitch-title', className]}>
+  <span class="sr-only">Lucas Maffei</span>
+  <img
+    src="/images/lucas-maffei-glitch.png"
+    alt=""
+    aria-hidden="true"
+    width="315"
+    height="157"
+    draggable="false"
+    decoding="async"
+    fetchpriority="high"
+  />
+</h1>
+
+<style>
+  .glitch-title {
+    margin: 0;
+    line-height: 1;
+    width: clamp(220px, 24vw, 420px);
+    max-width: 100%;
+  }
+  .glitch-title img {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* Preto desaparece sobre a arte, e o glitch branco permanece original. */
+    mix-blend-mode: screen;
+    user-select: none;
+    pointer-events: none;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
