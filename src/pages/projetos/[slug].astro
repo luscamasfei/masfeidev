@@ -2,21 +2,27 @@
 import { render } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ProjectArt from '@/components/projects/ProjectArt.astro';
-import { getProjects, projectNumber, projectStatusLabel, type Project } from '@/lib/projects';
+import { getProjects, projectHref, projectNumber, projectStatusLabel, type Project } from '@/lib/projects';
 
 export async function getStaticPaths() {
   const projects = await getProjects();
-  return projects.map((project, index) => ({ params: { slug: project.id }, props: { project, index } }));
+  return projects.map((project, index) => ({
+    params: { slug: project.id },
+    props: { project, index, previous: projects[index - 1], next: projects[index + 1] },
+  }));
 }
 
 interface Props {
   project: Project;
   index: number;
+  previous?: Project;
+  next?: Project;
 }
 
-const { project, index } = Astro.props;
-const { title, summary, status, context, technologies, repository, demo, art, team } = project.data;
-const { Content } = await render(project);
+const { project, index, previous, next } = Astro.props;
+const { title, summary, status, context, technologies, repository, demo, art, team, pending } = project.data;
+const { Content, headings } = await render(project);
+const sections = headings.filter((h) => h.depth === 2);
 const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(/\/$/, '');
 ---
 
@@ -28,6 +34,7 @@ const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(
     </a>
 
     <header class="project__head">
+      <p class="section-index project__index" aria-hidden="true">[ {projectNumber(index)} ]</p>
       <p class="project__eyebrow">// Projeto {projectNumber(index)} · {context}</p>
       <h1 id="project-title" class="project__title">{title}</h1>
       <p class="project__summary">{summary}</p>
@@ -38,6 +45,16 @@ const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(
     </figure>
 
     <div class="project__body">
+      <aside class="project__side">
+      {sections.length > 0 && (
+        <nav class="project__toc" aria-label="Nesta página">
+          <p class="project__toc-title">// Estudo de caso</p>
+          <ol>
+            {sections.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+            {pending.map((name) => <li class="project__toc-pending">{name}<span> · em documentação</span></li>)}
+          </ol>
+        </nav>
+      )}
       <dl class="project__meta">
         <div>
           <dt>Status</dt>
@@ -71,11 +88,46 @@ const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(
           </div>
         )}
       </dl>
+      </aside>
 
-      <div class="prose-noir project__content">
-        <Content />
+      <div class="project__main">
+        <div class="prose-noir project__content">
+          <Content />
+        </div>
+
+        {pending.length > 0 && (
+          <section class="project__pending" aria-labelledby="pending-title">
+            <h2 id="pending-title">Em documentação</h2>
+            <p>Estas seções ainda serão escritas: {pending.join(', ')}.</p>
+          </section>
+        )}
       </div>
     </div>
+
+    <nav class="project__pager" aria-label="Outros projetos">
+      {previous ? (
+        <a href={projectHref(previous)} class="pager__link" rel="prev">
+          <span class="pager__label">← Anterior</span>
+          <span class="pager__title">{previous.data.title}</span>
+        </a>
+      ) : (
+        <a href="/projetos/" class="pager__link">
+          <span class="pager__label">← Arquivo</span>
+          <span class="pager__title">Todos os projetos</span>
+        </a>
+      )}
+      {next ? (
+        <a href={projectHref(next)} class="pager__link pager__link--next" rel="next">
+          <span class="pager__label">Próximo →</span>
+          <span class="pager__title">{next.data.title}</span>
+        </a>
+      ) : (
+        <a href="/projetos/" class="pager__link pager__link--next">
+          <span class="pager__label">Arquivo →</span>
+          <span class="pager__title">Todos os projetos</span>
+        </a>
+      )}
+    </nav>
   </article>
 </BaseLayout>
 
@@ -98,8 +150,18 @@ const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(
   }
 
   .project__head {
+    position: relative;
     margin-top: 2.5rem;
+  }
+
+  .project__head > :not(.project__index) {
     max-width: 46rem;
+  }
+
+  .project__index {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   .project__eyebrow {
@@ -151,10 +213,58 @@ const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(
     margin-top: 3rem;
   }
 
-  .project__meta {
+  .project__side {
     align-self: start;
     position: sticky;
     top: 1.5rem;
+    display: grid;
+    gap: 2rem;
+  }
+
+  .project__toc-title {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-smoke);
+  }
+
+  .project__toc ol {
+    margin-top: 0.6rem;
+    border-left: 1px solid var(--color-line);
+    font-size: 0.75rem;
+    line-height: 1.15rem;
+    counter-reset: toc;
+  }
+
+  .project__toc li {
+    padding: 0.2rem 0 0.2rem 0.85rem;
+    counter-increment: toc;
+  }
+
+  .project__toc li::before {
+    content: counter(toc, decimal-leading-zero) ' ';
+    color: var(--color-smoke);
+  }
+
+  .project__toc a {
+    color: var(--color-ash);
+    transition: color 0.2s;
+  }
+
+  .project__toc a:hover {
+    color: var(--color-paper);
+  }
+
+  .project__toc-pending {
+    color: var(--color-smoke);
+  }
+
+  .project__toc-pending span {
+    font-size: 0.625rem;
+  }
+
+  .project__meta {
     display: grid;
     gap: 1.25rem;
     font-size: 0.75rem;
@@ -202,14 +312,76 @@ const host = (url: string) => new URL(url).host + new URL(url).pathname.replace(
     margin-top: 0.2rem;
   }
 
+  .project__pending {
+    margin-top: 2.5rem;
+    padding: 1rem 1.15rem;
+    border: 1px dashed var(--color-line-strong);
+  }
+
+  .project__pending h2 {
+    font-size: 0.625rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-smoke);
+  }
+
+  .project__pending p {
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    line-height: 1.15rem;
+    color: var(--color-ash);
+  }
+
+  .project__pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 4.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .pager__link {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--color-line);
+    transition: border-color 0.25s;
+  }
+
+  .pager__link:hover {
+    border-color: var(--color-line-strong);
+  }
+
+  .pager__link--next {
+    text-align: right;
+  }
+
+  .pager__label {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-smoke);
+  }
+
+  .pager__title {
+    font-size: 0.8125rem;
+    color: var(--color-paper);
+  }
+
   @media (max-width: 1023px) {
     .project__body {
       grid-template-columns: 1fr;
       gap: 2.5rem;
     }
 
-    .project__meta {
+    .project__side {
       position: static;
+    }
+
+    .project__meta {
       grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
     }
   }

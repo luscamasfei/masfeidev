@@ -8,6 +8,7 @@ technologies: [HTML, CSS, JavaScript, Node.js, Cloudflare]
 repository: https://github.com/luscamasfei/lirianewagner
 demo: https://lirianewagner.com.br
 art: corridor
+pending: [Aprendizados]
 ---
 
 ## Objetivo
