@@ -6,12 +6,17 @@ import { roadmapPageNodes, roadmapStatusLabel } from '@/data/roadmap';
 // Faixa da estrada na referência de 1672 px: x 92–1597 a partir de y 345.
 // Horizontalmente a estrada acompanha a largura da faixa; verticalmente usa
 // pixels reais (1 unidade = 1 px), para os nós não mudarem de tamanho.
-const FRAME = { left: 92, top: 345, width: 1505, height: 760 };
+const FRAME_TOP = 345;
+const lowestNode = Math.max(...roadmapPageNodes.map((node) => node.position.y));
+// A faixa termina 83 px abaixo do último nó, espaço do rótulo "em construção".
+const FRAME = { left: 92, top: FRAME_TOP, width: 1505, height: lowestNode - FRAME_TOP + 83 };
 // Distância da curva de retorno até os nós das pontas da serpentina.
 const TURN = 190;
 // Curvatura de cada trecho; negativo sobe. O trecho 08–09 arqueia por cima da
 // personagem; os trechos de troca de fileira (0) usam a curva de retorno.
-const BENDS = [-32, 32, -32, 32, 0, 32, -32, -44, 32, 0, -32, 32, -32, 32, 0, 32, -32, 32, -32];
+// Fileiras além da quarta repetem as curvas das fileiras 3 e 4.
+const BENDS = [-32, 32, -32, 32, 0, 32, -32, -44, 32, 0, -32, 32, -32, 32, 0, 32, -32, 32, -32, 0];
+const bendAt = (i: number) => (i < BENDS.length ? BENDS[i] : BENDS[10 + ((i - 10) % 10)]);
 
 const points = roadmapPageNodes.map((node) => ({
   x: node.position.x - FRAME.left,
@@ -25,7 +30,7 @@ const links = points.slice(0, -1).map((a, i) => {
     return `M${a.x} ${a.y}C${a.x + side} ${a.y} ${b.x + side} ${b.y} ${b.x} ${b.y}`;
   }
   const dx = (b.x - a.x) * 0.45;
-  const bend = BENDS[i] ?? 0;
+  const bend = bendAt(i);
   return `M${a.x} ${a.y}C${a.x + dx} ${a.y + bend} ${b.x - dx} ${b.y + bend} ${b.x} ${b.y}`;
 });
 

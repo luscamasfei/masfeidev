@@ -177,6 +177,8 @@ const { id, number, title, status, details, style } = Astro.props;
 </style>
 
 <script>
+  import { anchorPanel } from '@/lib/roadmap-panel';
+
   // Religado a cada navegação do ClientRouter; os eventos da página anterior
   // são descartados pelo AbortController.
   let controller: AbortController | undefined;
@@ -208,7 +210,9 @@ const { id, number, title, status, details, style } = Astro.props;
       const panel = panels.get(id);
       if (!panel) return;
       panel.hidden = false;
-      triggers.find((t) => t.dataset.roadmapTrigger === id)?.setAttribute('aria-expanded', 'true');
+      const trigger = triggers.find((t) => t.dataset.roadmapTrigger === id);
+      trigger?.setAttribute('aria-expanded', 'true');
+      if (trigger) anchorPanel(panel, trigger);
       openId = id;
       panel.querySelector<HTMLElement>('[data-roadmap-close]')?.focus({ preventScroll: true });
     };
