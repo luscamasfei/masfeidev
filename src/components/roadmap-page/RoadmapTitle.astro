@@ -1,30 +1,160 @@
 <span class="sr-only">Roadmap</span>
-<img
-  src="/images/roadmap-word-only-transparent.png"
-  width="565"
-  height="93"
-  alt=""
-  aria-hidden="true"
-  draggable="false"
-  loading="eager"
-  decoding="async"
-  fetchpriority="high"
-/>
+<span class="glitch" aria-hidden="true">
+  <img
+    src="/images/roadmap-word-only-transparent.png"
+    width="565"
+    height="93"
+    alt=""
+    draggable="false"
+    loading="eager"
+    decoding="async"
+    fetchpriority="high"
+  />
+  <span class="glitch__slice glitch__slice--a"></span>
+  <span class="glitch__slice glitch__slice--b"></span>
+  <span class="glitch__slice glitch__slice--c"></span>
+  <span class="glitch__tear glitch__tear--light"></span>
+  <span class="glitch__tear glitch__tear--dark"></span>
+</span>
 
 <style>
   /*
    * A arte é exibida no tamanho nativo (565 × 93), o mesmo da referência.
    * O "R" começa a 58 px da borda do arquivo: o recuo alinha a letra à
    * coluna de texto e deixa os rastros do glitch vazarem para a margem.
+   *
+   * A animação repete o ritmo do GIF do título da home (download.gif):
+   * ciclo de 2,84 s, com pausas de 990 ms e rajadas de quadros de 70 ms em
+   * que faixas horizontais se deslocam e riscos cortam as letras.
    */
-  img {
+  .glitch {
     --w: min(35.3125rem, 100vw - 1rem);
+    --art: url('/images/roadmap-word-only-transparent.png');
+    position: relative;
     display: block;
     width: var(--w);
-    max-width: none;
-    height: auto;
     margin-left: calc(var(--w) * -0.1027);
     user-select: none;
     pointer-events: none;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    animation: glitch-base 2.84s steps(1, end) infinite;
+  }
+
+  /* Cópias da arte recortadas em faixas; o fundo escuro esconde a faixa original. */
+  .glitch__slice {
+    position: absolute;
+    inset: 0;
+    background: var(--art) 0 0 / 100% 100% no-repeat var(--color-void);
+    opacity: 0;
+    animation: 2.84s steps(1, end) infinite;
+  }
+
+  .glitch__slice--a {
+    clip-path: inset(56% 0 22% 0);
+    animation-name: glitch-a;
+  }
+
+  .glitch__slice--b {
+    clip-path: inset(12% 0 68% 0);
+    animation-name: glitch-b;
+  }
+
+  .glitch__slice--c {
+    clip-path: inset(40% 0 52% 0);
+    animation-name: glitch-c;
+  }
+
+  .glitch__tear {
+    position: absolute;
+    height: 1px;
+    opacity: 0;
+    animation: 2.84s steps(1, end) infinite;
+  }
+
+  .glitch__tear--light {
+    top: 30%;
+    left: 0;
+    width: 32%;
+    background: linear-gradient(to right, rgb(255 255 255 / 0.15), rgb(255 255 255 / 0.75) 40%, rgb(255 255 255 / 0.3));
+    animation-name: glitch-tear-light;
+  }
+
+  .glitch__tear--dark {
+    top: 64%;
+    left: 10%;
+    width: 72%;
+    height: 2px;
+    background: var(--color-void);
+    animation-name: glitch-tear-dark;
+  }
+
+  /* Quadros: 34.86–44.72% (quatro de 70 ms) e 79.58–84.51% (dois de 70 ms). */
+  @keyframes glitch-base {
+    0% { translate: 0; opacity: 1; }
+    37.32% { translate: -2px 0; }
+    39.79% { translate: 0; opacity: 0.85; }
+    42.25% { opacity: 1; }
+    82.04% { translate: 1px 0; }
+    84.51%, 100% { translate: 0; opacity: 1; }
+  }
+
+  @keyframes glitch-a {
+    0% { opacity: 0; }
+    34.86% { opacity: 1; translate: 6px 0; }
+    37.32% { opacity: 0; }
+    39.79% { opacity: 1; translate: -4px 0; }
+    42.25% { opacity: 0; }
+    79.58% { opacity: 1; translate: 3px 0; }
+    82.04%, 100% { opacity: 0; translate: 0; }
+  }
+
+  @keyframes glitch-b {
+    0% { opacity: 0; }
+    37.32% { opacity: 1; translate: -8px 0; }
+    39.79% { opacity: 0; }
+    82.04% { opacity: 1; translate: 5px 0; }
+    84.51%, 100% { opacity: 0; translate: 0; }
+  }
+
+  @keyframes glitch-c {
+    0% { opacity: 0; }
+    37.32% { opacity: 1; translate: 10px 0; }
+    39.79% { opacity: 0; }
+    42.25% { opacity: 1; translate: -6px 0; }
+    44.72% { opacity: 0; }
+    82.04% { opacity: 1; translate: 4px 0; }
+    84.51%, 100% { opacity: 0; translate: 0; }
+  }
+
+  @keyframes glitch-tear-light {
+    0% { opacity: 0; }
+    37.32% { opacity: 1; }
+    39.79% { opacity: 0; }
+    82.04% { opacity: 0.8; }
+    84.51%, 100% { opacity: 0; }
+  }
+
+  @keyframes glitch-tear-dark {
+    0% { opacity: 0; }
+    34.86% { opacity: 1; }
+    37.32% { opacity: 0; }
+    42.25% { opacity: 1; }
+    44.72% { opacity: 0; }
+    79.58% { opacity: 1; }
+    82.04%, 100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    img,
+    .glitch__slice,
+    .glitch__tear {
+      animation: none;
+    }
   }
 </style>
