@@ -187,7 +187,7 @@ const narrowLinks = roadmapPageStages.slice(0, -1).map((_, i) => {
     .track {
       height: calc(var(--stage-count) * 19rem);
       max-width: 30rem;
-      margin: 1.5rem auto 0;
+      margin: 0 auto 7rem;
     }
 
     .track__path--wide {
@@ -196,6 +196,10 @@ const narrowLinks = roadmapPageStages.slice(0, -1).map((_, i) => {
 
     .track__path--narrow {
       display: block;
+    }
+
+    .stage__label {
+      background: var(--color-void);
     }
 
     .stage {
