@@ -39,7 +39,21 @@ const stars = Array.from({ length: 180 }, (_, index) => ({
 </div>
 
 <style>
-  .background { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--color-void); }
+  .background {
+    --fade: #000 0%, #000 38%, rgb(0 0 0 / 0.97) 46%, rgb(0 0 0 / 0.9) 54%, rgb(0 0 0 / 0.77) 62%,
+      rgb(0 0 0 / 0.59) 70%, rgb(0 0 0 / 0.39) 78%, rgb(0 0 0 / 0.21) 86%, rgb(0 0 0 / 0.08) 93%, transparent 100%;
+    /* Curva smoothstep nas bordas: começa e termina sem quebra. */
+    --edge-in: transparent 0%, rgb(0 0 0 / 0.06) 2%, rgb(0 0 0 / 0.2) 4%, rgb(0 0 0 / 0.38) 6%, rgb(0 0 0 / 0.58) 8%, rgb(0 0 0 / 0.76) 10%, rgb(0 0 0 / 0.9) 12%, #000;
+    --edge-out: #000 86%, rgb(0 0 0 / 0.9) 88%, rgb(0 0 0 / 0.76) 90%, rgb(0 0 0 / 0.58) 92%, rgb(0 0 0 / 0.38) 94%, rgb(0 0 0 / 0.2) 96%, rgb(0 0 0 / 0.06) 98%, transparent 100%;
+    --edge-in-y: transparent 0%, rgb(0 0 0 / 0.2) 3%, rgb(0 0 0 / 0.5) 6%, rgb(0 0 0 / 0.8) 9%, #000;
+    --edge-out-y: #000 80%, rgb(0 0 0 / 0.9) 83%, rgb(0 0 0 / 0.72) 86%, rgb(0 0 0 / 0.5) 89%, rgb(0 0 0 / 0.28) 92%, rgb(0 0 0 / 0.1) 95%, rgb(0 0 0 / 0.02) 98%, transparent 100%;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--color-void);
+  }
   .background__stars {
     position: absolute;
     inset: 0;
@@ -59,9 +73,16 @@ const stars = Array.from({ length: 180 }, (_, index) => ({
     height: auto;
     margin-inline: auto;
     filter: brightness(0.8) contrast(1.04);
+    /*
+     * Máscara elíptica, centrada entre a lua e a personagem, multiplicada por
+     * uma proteção estreita em cada borda: a arte some antes do limite da
+     * imagem, sem cantos nem linhas retas. Todas as paradas seguem curvas
+     * suaves, para a transição não formar anéis ou faixas.
+     */
     mask-image:
-      linear-gradient(to right, transparent, rgb(0 0 0 / 0.15) 4%, rgb(0 0 0 / 0.65) 12%, #000 22%, #000 78%, rgb(0 0 0 / 0.65) 88%, rgb(0 0 0 / 0.15) 96%, transparent),
-      linear-gradient(to bottom, transparent, #000 15%, #000 70%, rgb(0 0 0 / 0.65) 83%, rgb(0 0 0 / 0.15) 95%, transparent);
+      radial-gradient(ellipse 62% 66% at 53% 46%, var(--fade)),
+      linear-gradient(to right, var(--edge-in) 14%, #000 14% 86%, var(--edge-out)),
+      linear-gradient(to bottom, var(--edge-in-y) 12%, #000 12% 80%, var(--edge-out-y));
     mask-composite: intersect;
   }
   .background__arrival { display: none; }
@@ -69,7 +90,7 @@ const stars = Array.from({ length: 180 }, (_, index) => ({
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgb(4 4 4 / 0.88) 0 var(--spacing-header), transparent 9rem);
+    background: linear-gradient(to bottom, rgb(4 4 4 / 0.6), rgb(4 4 4 / 0.3) var(--spacing-header), rgb(4 4 4 / 0.1) 5.5rem, transparent 8rem);
   }
   /* As duas zonas preservam a lua no topo e a figura sentada no encerramento. */
   @media (max-width: 1023px) {
