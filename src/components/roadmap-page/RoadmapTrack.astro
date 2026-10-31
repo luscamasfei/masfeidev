@@ -208,8 +208,8 @@ const nodeStyle = (i: number) => [
     font-size: 0.6875rem;
     line-height: 1.05rem;
     text-align: center;
-    background: #444;
-    color: #9a9a9a;
+    background: #383838;
+    color: #a8a8a8;
   }
 
   .node__tag::before {
@@ -219,7 +219,7 @@ const nodeStyle = (i: number) => [
     top: calc(100% + 0.05rem);
     width: 0.7rem;
     height: 1px;
-    background: #444;
+    background: #383838;
     rotate: -45deg;
     transform-origin: right center;
   }
@@ -257,8 +257,7 @@ const nodeStyle = (i: number) => [
     font-size: 0.71875rem;
     letter-spacing: 0.03em;
     line-height: 1rem;
-    /* Um pouco mais claro que na home: contraste mínimo de 4,5:1 sobre o fundo escuro. */
-    color: #7d7d7d;
+    color: var(--color-smoke);
   }
 
   .node--building .node__status {
