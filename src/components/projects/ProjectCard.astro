@@ -222,6 +222,101 @@ const { project, upcoming, index, headingLevel: Heading = 'h3', layout = 'compac
     line-height: 1.125rem;
   }
 
+  /*
+   * Interação do arquivo: borda mais clara, uma interferência curta na arte
+   * (deslize horizontal em degraus e uma linha de varredura, ~320 ms, uma vez
+   * por passagem) e a seta acesa. Nada fica animando em repouso.
+   */
+  .card--archive .card__art {
+    position: relative;
+  }
+
+  .card--archive .card__art::after {
+    content: '';
+    position: absolute;
+    inset: 38% 0 auto;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.7) 20%, rgb(255 255 255 / 0.4) 70%, transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .card--archive .card__arrow {
+    opacity: 0.7;
+    transition: opacity 0.25s, transform 0.3s var(--ease-glitch);
+  }
+
+  .card--archive:not(.card--upcoming):is(:hover, :focus-within) {
+    border-color: rgb(255 255 255 / 0.6);
+  }
+
+  .card--archive:hover .card__art :global(.card__svg) {
+    transform: none;
+  }
+
+  .card--archive:not(.card--upcoming):is(:hover, :focus-within) .card__art :global(.card__svg) {
+    filter: brightness(1.08);
+    animation: card-interference 320ms steps(1, end) 1;
+  }
+
+  .card--archive:not(.card--upcoming):is(:hover, :focus-within) .card__art::after {
+    animation: card-scanline 320ms steps(1, end) 1;
+  }
+
+  .card--archive:not(.card--upcoming):is(:hover, :focus-within) .card__arrow {
+    opacity: 1;
+    transform: translate(2px, -2px);
+  }
+
+  /* O cartão do próximo projeto não é um link: não reage como os demais. */
+  .card--upcoming:hover {
+    border-color: rgb(255 255 255 / 0.24);
+  }
+
+  @keyframes card-interference {
+    0% {
+      translate: -3px 0;
+      mask-image: var(--scanlines);
+    }
+    25% {
+      translate: 2px 0;
+      mask-image: var(--scanlines);
+      mask-position: 0 3px;
+    }
+    50% {
+      translate: -1px 0;
+    }
+    75%,
+    100% {
+      translate: 0;
+    }
+  }
+
+  @keyframes card-scanline {
+    0% {
+      opacity: 0.8;
+    }
+    30% {
+      opacity: 0;
+      translate: 0 14px;
+    }
+    55% {
+      opacity: 0.5;
+      translate: 0 -8px;
+    }
+    80%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card--archive .card__art :global(.card__svg),
+    .card--archive .card__art::after {
+      animation: none !important;
+    }
+  }
+
   .card--upcoming .card__title {
     margin-top: 0;
   }
