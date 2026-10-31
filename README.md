@@ -32,4 +32,8 @@ Para editar o roadmap:
 
 ## Uso de Inteligência Artificial
 
-Este projeto foi desenvolvido por Lucas Maffei com o auxílio do OpenAI Codex durante etapas de implementação, revisão e aprimoramento do código. As decisões sobre identidade visual, funcionalidades e direcionamento do projeto foram conduzidas pelo autor.
+Este projeto foi desenvolvido por mim com a utilização do Claude Code e Codex da OpenAI.
+
+As ferramentas foram usadas na implementação, na revisão e no aprimoramento do código, além dos testes visuais em diferentes tamanhos de tela. Cada etapa foi apresentada, revisada e aprovada por mim antes de ser publicada.
+
+As decisões sobre identidade visual, funcionalidades e direcionamento do projeto são minhas. As informações sobre minha formação, meus projetos e meus estudos foram fornecidas por mim: nenhum projeto, habilidade ou experiência foi inventado.
