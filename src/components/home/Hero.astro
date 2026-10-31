@@ -39,12 +39,6 @@ import { hero } from '@/data/home';
       </a>
     </div>
 
-    <figure class="hero__quote">
-      <blockquote>
-        <p>“{hero.quote[0]}<br />&nbsp;{hero.quote[1]}”</p>
-      </blockquote>
-    </figure>
-
     <ul class="hero__verbs" aria-label="Princípios">
       {hero.verbs.map((verb) => <li>{verb}</li>)}
       <li aria-hidden="true">//</li>
@@ -185,29 +179,6 @@ import { hero } from '@/data/home';
     transform: translateX(3px);
   }
 
-  .hero__quote {
-    position: absolute;
-    top: 2.6rem;
-    right: -1.4rem;
-    margin: 0;
-    font-size: 0.70625rem;
-    font-weight: 500;
-    letter-spacing: 0;
-    line-height: 1rem;
-    text-transform: uppercase;
-    color: #f2f2f2;
-    text-shadow: 0 0 6px rgb(0 0 0 / 0.95), 0 0 2px rgb(0 0 0 / 0.9);
-  }
-
-  .hero__quote::after {
-    content: '';
-    display: block;
-    width: 3.375rem;
-    height: 1px;
-    margin: 2rem 0.5rem 0 auto;
-    background: var(--color-line-strong);
-  }
-
   .hero__verbs {
     position: absolute;
     top: 15.4rem;
@@ -263,10 +234,6 @@ import { hero } from '@/data/home';
       right: 0;
     }
 
-    .hero__quote {
-      right: 0;
-    }
-
     :global(.hero__spark--right),
     .streak--d {
       display: none;
@@ -304,15 +271,6 @@ import { hero } from '@/data/home';
     .hero__copy {
       padding-top: 0;
       max-width: 34rem;
-    }
-
-    .hero__quote {
-      position: static;
-      margin-top: 2.5rem;
-    }
-
-    .hero__quote::after {
-      margin-left: 0;
     }
 
     .hero__verbs,
