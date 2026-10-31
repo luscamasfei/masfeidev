@@ -3,6 +3,8 @@
  * (github.com/luscamasfei); não acrescentar formação, metas ou contatos que
  * não estejam lá.
  */
+import { site } from '@/data/site';
+
 export interface Experience {
   /** Área ou cargo, por exemplo "Atendimento ao cliente". */
   title: string | null;
@@ -19,6 +21,22 @@ export interface Experience {
  * Experiências de trabalho reais, preenchidas pelo autor. Campo `null`
  * aparece na página como "a confirmar"; não preencher com suposições.
  */
+export interface ContactLink {
+  label: string;
+  icon: 'github' | 'linkedin' | 'mail';
+  /** Texto exibido no cartão; `null` mostra "em breve". */
+  handle: string | null;
+  /** Sem endereço, o cartão aparece sem link. */
+  href: string | null;
+}
+
+/* E-mail público do perfil do GitHub. LinkedIn ainda sem endereço, por decisão do autor. */
+const contacts: ContactLink[] = [
+  { label: 'GitHub', icon: 'github', handle: 'github.com/luscamasfei', href: site.github },
+  { label: 'LinkedIn', icon: 'linkedin', handle: null, href: null },
+  { label: 'E-mail', icon: 'mail', handle: 'luscamasfei@gmail.com', href: 'mailto:luscamasfei@gmail.com' },
+];
+
 const experiences: Experience[] = [
   { title: null, period: null, skills: [], description: null },
   { title: null, period: null, skills: [], description: null },
@@ -49,4 +67,9 @@ export const about = {
       items: ['Python'],
     },
   ],
+  contact: {
+    title: 'Contato',
+    description: 'Vamos conversar? Você pode me encontrar nas plataformas abaixo ou entrar em contato diretamente por e-mail.',
+    links: contacts,
+  },
 } as const;
