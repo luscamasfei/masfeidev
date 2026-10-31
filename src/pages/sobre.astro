@@ -15,6 +15,39 @@ import { about } from '@/data/about';
         <li>//</li>
       </ul>
     </PageHeader>
+
+    <section class="block" aria-labelledby="experiences-title">
+      <h2 id="experiences-title" class="block__head">
+        <span>// Experiências de trabalho</span>
+        <span class="section-index" aria-hidden="true">[ 02 ]</span>
+      </h2>
+      <ul class="jobs">
+        {about.experiences.map((job) => {
+          const Card = job.href ? 'a' : 'article';
+          return (
+            <li>
+              <Card class="job" href={job.href} {...(job.href && { rel: 'noopener noreferrer', target: '_blank' })}>
+                <div class="job__top">
+                  <h3 class:list={['job__title', { pending: !job.title }]}>{job.title ?? 'Experiência a confirmar'}</h3>
+                  <p class:list={['job__period', { pending: !job.period }]}>{job.period ?? 'Período a confirmar'}</p>
+                </div>
+                {job.skills.length > 0
+                  ? <ul class="job__skills">{job.skills.map((skill) => <li>{skill}</li>)}</ul>
+                  : <p class="job__skills pending">Competências a confirmar</p>}
+                <p class:list={['job__description', { pending: !job.description }]}>
+                  {job.description ?? 'Descrição pendente: preencher em src/data/about.ts com os dados reais.'}
+                </p>
+                {job.href && (
+                  <svg class="job__arrow" width="12" height="12" viewBox="0 0 13 13" aria-hidden="true">
+                    <path d="M1.5 11.5 11 2M4 1.5h7.5V9" fill="none" stroke="currentColor" stroke-width="1.2" />
+                  </svg>
+                )}
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   </section>
 </BaseLayout>
 
@@ -68,6 +101,130 @@ import { about } from '@/data/about';
     line-height: 1.125rem;
     text-transform: uppercase;
     color: var(--color-ash);
+  }
+
+  /* Seções numeradas, separadas pela mesma divisória da apresentação. */
+  .block {
+    padding: 1.25rem 0 1.6875rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .block__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-left: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-paper);
+  }
+
+  /* Dois cartões de 682 px com 35 px entre eles, na largura de 1400 px. */
+  .jobs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 2.1875rem;
+    margin-top: 0.8125rem;
+  }
+
+  .jobs > li {
+    display: flex;
+  }
+
+  .job {
+    position: relative;
+    flex: 1;
+    min-height: 7.625rem;
+    padding: 0.4375rem 1.3125rem 1rem;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    background: var(--color-void);
+  }
+
+  a.job {
+    transition: border-color 0.2s;
+  }
+
+  a.job:hover {
+    border-color: var(--color-line-strong);
+  }
+
+  .job__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 1rem;
+  }
+
+  .job__title {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.75rem;
+    color: var(--color-paper);
+  }
+
+  .job__period {
+    flex-shrink: 0;
+    font-size: 0.65625rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    color: var(--color-ash);
+  }
+
+  .job__skills {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    color: var(--color-ash);
+  }
+
+  .job__skills li + li::before {
+    content: '•';
+    margin-inline: 0.75rem;
+  }
+
+  .job__description {
+    max-width: 32rem;
+    margin-top: 0.4375rem;
+    font-size: 0.8125rem;
+    letter-spacing: 0.03em;
+    line-height: 1.25rem;
+    color: var(--color-ash);
+  }
+
+  .job__arrow {
+    position: absolute;
+    right: 1.3125rem;
+    bottom: 1.5rem;
+    color: var(--color-paper);
+    transition: translate 0.2s var(--ease-glitch);
+  }
+
+  a.job:hover .job__arrow {
+    translate: 2px -2px;
+  }
+
+  /* Campo ainda não informado: aparece apagado, para não passar por dado real. */
+  .pending {
+    color: var(--color-smoke);
+    font-style: italic;
+  }
+
+  .job__title.pending {
+    font-size: 1.25rem;
+  }
+
+  @media (max-width: 899px) {
+    .jobs {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   @media (max-width: 639px) {
