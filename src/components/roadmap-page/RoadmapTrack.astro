@@ -1,70 +1,206 @@
 ---
+import RoadmapIcon from '@/components/roadmap/RoadmapIcon.astro';
 import { roadmapPageStages, roadmapStatusLabel } from '@/data/roadmap';
+
+// A estrada e os nós compartilham o mesmo plano dentro do container do site.
+// As posições da referência definem a forma relativa, não o tamanho da viewport.
+const MAP_WIDTH = 1400;
+const MAP_HEIGHT = 340;
+const first = roadmapPageStages[0].position;
+const last = roadmapPageStages[roadmapPageStages.length - 1].position;
+const points = roadmapPageStages.map((stage) => ({
+  x: 110 + ((stage.position.x - first.x) / (last.x - first.x)) * (MAP_WIDTH - 220),
+  y: 72 + (stage.position.y - first.y) * 0.9,
+}));
+const links = points.slice(0, -1).map((a, i) => {
+  const b = points[i + 1];
+  const dx = (b.x - a.x) * 0.45;
+  const bend = i % 2 === 0 ? -38 : 38;
+  return `M${a.x} ${a.y}C${a.x + dx} ${a.y + bend} ${b.x - dx} ${b.y + bend} ${b.x} ${b.y}`;
+});
+const narrowHeight = roadmapPageStages.length * 100;
+const narrowPoint = (i: number) => ({ x: 50, y: i * 100 + 50 });
+const narrowLinks = roadmapPageStages.slice(0, -1).map((_, i) => {
+  const a = narrowPoint(i);
+  const b = narrowPoint(i + 1);
+  return `M${a.x} ${a.y}C${a.x} ${a.y + 50} ${b.x} ${b.y - 50} ${b.x} ${b.y}`;
+});
 ---
 
-<div class="track">
+<div class="track" style={`--stage-count: ${roadmapPageStages.length}`}>
   <h2 class="sr-only">Etapas da jornada</h2>
+  <svg class="track__path track__path--wide" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {links.map((d) => <path d={d} />)}
+  </svg>
+  <svg class="track__path track__path--narrow" viewBox={`0 0 100 ${narrowHeight}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {narrowLinks.map((d) => <path d={d} />)}
+  </svg>
   <ol aria-label="Etapas da jornada" class="stages">
-    {roadmapPageStages.map((stage) => (
-      <li id={`etapa-${stage.id}`} class:list={['stage', { 'stage--active': stage.active }]}
-        style={`--node-x: ${stage.position.x / 1672 * 100}%; --node-y: ${(stage.position.y - 411) / 16}rem;`}
-        aria-current={stage.active ? 'step' : undefined}>
-        <span class="number" aria-hidden="true">{stage.number}</span>
-        <h3>{stage.title}</h3>
-        <p class="status">{roadmapStatusLabel[stage.status]}</p>
-      </li>
-    ))}
+    {roadmapPageStages.map((stage, i) => {
+      const p = points[i];
+      const n = narrowPoint(i);
+      return (
+        <li id={`etapa-${stage.id}`} class:list={['stage', { 'stage--active': stage.active }]}
+          aria-current={stage.active ? 'step' : undefined}
+          style={`--x: ${p.x / MAP_WIDTH * 100}%; --y: ${p.y / MAP_HEIGHT * 100}%; --nx: ${n.x}%; --ny: ${n.y / narrowHeight * 100}%;`}>
+          <span class="stage__number" aria-hidden="true">{stage.number}</span>
+          <span class="stage__ring" aria-hidden="true">
+            {stage.icon === 'briefcase' ? (
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V4h8v3M3 12q9 5 18 0M10 13h4v3h-4z" /></svg>
+            ) : <RoadmapIcon name={stage.icon} />}
+          </span>
+          <div class="stage__label">
+            <h3><span class="sr-only">Etapa {stage.number}: </span>{stage.title}</h3>
+            <p class="stage__status">{roadmapStatusLabel[stage.status]}</p>
+            <p class="stage__summary">{stage.summary}</p>
+          </div>
+        </li>
+      );
+    })}
   </ol>
 </div>
 
 <style>
-  /* Base estrutural: trilha, ícones e cards entram nas etapas seguintes. */
-  .track { position: relative; min-height: 19rem; }
-  .stages { position: relative; min-height: inherit; }
+  .track {
+    position: relative;
+    height: 21.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .track__path {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: rgb(255 255 255 / 0.8);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+  }
+
+  .track__path path {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .track__path--narrow {
+    display: none;
+  }
+
+  .stages {
+    position: absolute;
+    inset: 0;
+  }
+
   .stage {
     position: absolute;
-    top: var(--node-y);
-    left: var(--node-x);
-    width: 13rem;
-    transform: translateX(-50%);
+    left: var(--x);
+    top: var(--y);
+    width: 4.25rem;
+    height: 4.25rem;
+    translate: -50% -50%;
+    color: var(--color-ash);
     text-align: center;
   }
-  .number {
+
+  .stage__ring {
     display: grid;
     place-items: center;
-    width: 4.5rem;
-    height: 4.5rem;
-    margin-inline: auto;
-    border: 1px solid #a3a3a3;
-    background: rgb(4 4 4 / 0.96);
+    width: 100%;
+    height: 100%;
+    border: 1.5px solid #aaa;
     border-radius: 50%;
-    font-size: 0.75rem;
-    color: var(--color-paper);
-  }
-  .stage--active .number { border-color: var(--color-paper); color: var(--color-paper); }
-  h3 {
-    display: table;
-    margin: 0.65rem auto 0;
-    padding: 0.2rem 0.5rem;
-    background: rgb(4 4 4 / 0.94);
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.5;
-    color: var(--color-paper);
-  }
-  .status {
-    display: table;
-    margin: 0.3rem auto 0;
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--color-line-strong);
-    background: rgb(4 4 4 / 0.96);
+    background: var(--color-void);
     font-size: 0.6875rem;
-    line-height: 1.5;
-    color: var(--color-paper);
-    text-transform: uppercase;
   }
+
+  .stage__label {
+    position: absolute;
+    top: calc(100% + 0.7rem);
+    left: 50%;
+    translate: -50% 0;
+    width: 12.5rem;
+  }
+
+  .stage__ring :global(svg) { width: 30px; height: 30px; }
+  .stage--active .stage__ring :global(svg) { width: 38px; height: 38px; }
+  .stage__number {
+    position: absolute;
+    top: -1rem;
+    right: -0.8rem;
+    padding: 0.15rem 0.3rem;
+    background: #bbb;
+    color: var(--color-void);
+    font-size: 0.65625rem;
+  }
+  .stage--active .stage__number { background: var(--color-paper); }
+  .stage__summary {
+    margin-top: 0.65rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-line-strong);
+    background: rgb(4 4 4 / 0.78);
+    color: var(--color-ash);
+    font-size: 0.75rem;
+    line-height: 1.15rem;
+    text-align: left;
+  }
+
+  h3 {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .stage__status {
+    display: inline-block;
+    margin-top: 0.4rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--color-line-strong);
+    background: rgb(4 4 4 / 0.85);
+    text-transform: uppercase;
+    font-size: 0.65625rem;
+    font-weight: 400;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .stage--active {
+    width: 5.25rem;
+    height: 5.25rem;
+    color: var(--color-paper);
+  }
+
+  .stage--active .stage__ring {
+    border: 2px solid var(--color-paper);
+    box-shadow: 0 0 16px rgb(255 255 255 / 0.32), inset 0 0 10px rgb(255 255 255 / 0.12);
+  }
+
+  .stage--active h3 {
+    color: var(--color-paper);
+  }
+
+  .stage--active .stage__status {
+    color: var(--color-ash);
+  }
+
   @media (max-width: 1023px) {
-    .stages { display: grid; gap: 2rem; padding-block: 1rem; }
-    .stage { position: relative; top: auto; left: auto; width: auto; transform: none; }
+    .track {
+      height: calc(var(--stage-count) * 19rem);
+      max-width: 30rem;
+      margin: 1.5rem auto 0;
+    }
+
+    .track__path--wide {
+      display: none;
+    }
+
+    .track__path--narrow {
+      display: block;
+    }
+
+    .stage {
+      left: var(--nx);
+      top: var(--ny);
+    }
   }
 </style>
