@@ -1,0 +1,73 @@
+---
+import { Picture } from 'astro:assets';
+import planetarySunrise from '@/assets/about/planetary-sunrise.png';
+---
+
+<!--
+  Cenário da página /sobre: horizonte planetário, nascer do sol e planeta à
+  direita, preso ao pé da página. Como na referência, a arte desce 4,25% da
+  própria altura e o corte fica abaixo da tela. Nunca passa do tamanho
+  original (1672 px): em telas maiores as laterais se dissolvem no preto.
+-->
+<div class="scene" aria-hidden="true">
+  <!-- Curva de gama: escurece os tons médios e preserva o brilho do sol, como na referência. -->
+  <svg width="0" height="0" class="scene__filter">
+    <filter id="about-scene-tone" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR type="gamma" exponent="2.5" />
+        <feFuncG type="gamma" exponent="2.5" />
+        <feFuncB type="gamma" exponent="2.5" />
+      </feComponentTransfer>
+    </filter>
+  </svg>
+  <Picture
+    src={planetarySunrise}
+    formats={['avif', 'webp']}
+    widths={[828, 1254, 1672]}
+    sizes="(min-width: 768px) min(100vw, 1672px), 896px"
+    quality={85}
+    alt=""
+    loading="eager"
+    decoding="async"
+    class="scene__art"
+  />
+</div>
+
+<style>
+  .scene {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .scene__filter {
+    position: absolute;
+  }
+
+  .scene :global(.scene__art) {
+    position: absolute;
+    bottom: calc(var(--art-h) * -0.0425);
+    left: 50%;
+    width: min(100%, 104.5rem);
+    max-width: none;
+    height: auto;
+    translate: -50% 0;
+    filter: url(#about-scene-tone);
+    /* O céu de cima já é preto; as máscaras só evitam cortes retos. */
+    mask-image:
+      linear-gradient(to bottom, transparent, #000 12%),
+      linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+    mask-composite: intersect;
+  }
+
+  /* Telas estreitas: a arte fica maior que a tela, centrada no nascer do sol. */
+  @media (max-width: 767px) {
+    .scene :global(.scene__art) {
+      width: 56rem;
+      translate: -41% 0;
+      mask-image: linear-gradient(to bottom, transparent, #000 30%);
+    }
+  }
+</style>

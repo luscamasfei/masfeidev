@@ -2,10 +2,13 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeader from '@/components/ui/PageHeader.astro';
 import GlitchWordmark from '@/components/ui/GlitchWordmark.astro';
+import AboutBackground from '@/components/about/AboutBackground.astro';
 import { about } from '@/data/about';
 ---
 
 <BaseLayout title={about.title} description={about.description}>
+  <div class="about-page">
+  <AboutBackground />
   <section class="site-container page" aria-labelledby="page-title">
     <PageHeader eyebrow={about.eyebrow} title={about.title}>
       <GlitchWordmark slot="title" text={about.title} src="/images/sobre-glitch" width={337} height={54} inset={58} />
@@ -125,6 +128,7 @@ import { about } from '@/data/about';
       </div>
     </section>
   </section>
+  </div>
 </BaseLayout>
 
 <style>
@@ -133,10 +137,22 @@ import { about } from '@/data/about';
    * texto recuados 4 px, e o detalhe das palavras preso à direita, alinhado
    * logo abaixo do topo do título.
    */
+  /*
+   * A página ocupa ao menos a tela inteira e reserva, abaixo do contato, o
+   * espaço do horizonte (~19% da altura da arte, como na referência). Com
+   * mais conteúdo, o cenário desce junto.
+   */
+  .about-page {
+    --art-h: calc(min(100vw, 104.5rem) * 941 / 1672);
+    position: relative;
+    isolation: isolate;
+    min-height: calc(100svh - var(--spacing-header) - 1px);
+  }
+
   .page {
     /* Divisórias internas da referência: mais visíveis que a linha do cabeçalho. */
     --rule: rgb(255 255 255 / 0.26);
-    padding-top: 2.3125rem;
+    padding: 2.3125rem 0 max(var(--art-h) * 0.19, var(--art-h) * 0.15 + 1.5rem);
   }
 
   .page :global(.page-head) {
@@ -478,6 +494,12 @@ import { about } from '@/data/about';
       margin-right: 0;
       padding-left: 0;
       border-right: 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .about-page {
+      --art-h: 31.5rem;
     }
   }
 
