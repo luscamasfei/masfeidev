@@ -4,7 +4,7 @@ import RoadmapBackground from './RoadmapBackground.astro';
 import RoadmapTrack from './RoadmapTrack.astro';
 import { roadmapPage } from '@/data/roadmap';
 
-const [placesNote, stepNote] = roadmapPage.notes;
+const stepNote = roadmapPage.note;
 ---
 
 <section class="roadmap-page" aria-labelledby="page-title">
@@ -13,7 +13,6 @@ const [placesNote, stepNote] = roadmapPage.notes;
     <div class="roadmap-page__intro">
       <RoadmapHero />
       <aside class="side" aria-label="Direção da jornada">
-        <blockquote>“{roadmapPage.quote[0]}<br />&nbsp;{roadmapPage.quote[1]}”</blockquote>
         <ul aria-label="Princípios da jornada">
           {roadmapPage.verbs.map((verb) => <li>{verb}</li>)}
           <li aria-hidden="true">//</li>
@@ -22,9 +21,6 @@ const [placesNote, stepNote] = roadmapPage.notes;
     </div>
     <RoadmapTrack />
     <div class="notes">
-      <aside class="note note--places">
-        {placesNote.map((line) => <p>{line}</p>)}
-      </aside>
       <div class="notes__end">
         <aside class="note note--step">
           <p>“{stepNote[0]}<br />&nbsp;{stepNote[1]}”</p>
@@ -75,31 +71,14 @@ const [placesNote, stepNote] = roadmapPage.notes;
     pointer-events: none;
   }
 
-  /* Citação e verbos seguem o desenho do hero da home. */
+  /* Os verbos seguem o desenho do hero da home. */
   .side {
     position: absolute;
     inset: 0 0 auto auto;
     height: 100%;
-    font-size: 0.70625rem;
-    font-weight: 500;
     letter-spacing: 0.06em;
-    line-height: 1rem;
     text-transform: uppercase;
-    color: #f2f2f2;
     text-shadow: 0 0 6px rgb(0 0 0 / 0.95), 0 0 2px rgb(0 0 0 / 0.9);
-  }
-
-  blockquote {
-    margin-top: 0.8125rem;
-  }
-
-  blockquote::after {
-    content: '';
-    display: block;
-    width: 3.0625rem;
-    height: 1px;
-    margin: 1.4375rem 0 0 auto;
-    background: var(--color-line-strong);
   }
 
   .side ul {
@@ -117,8 +96,7 @@ const [placesNote, stepNote] = roadmapPage.notes;
   .notes {
     display: flex;
     align-items: flex-end;
-    justify-content: space-between;
-    gap: 2rem;
+    justify-content: flex-end;
     margin-top: auto;
     padding-top: 2rem;
   }
@@ -138,25 +116,6 @@ const [placesNote, stepNote] = roadmapPage.notes;
     display: block;
     height: 1px;
     background: var(--color-line-strong);
-  }
-
-  .note--places {
-    width: 13.75rem;
-    padding: 1.1875rem 1.25rem 1.5rem;
-  }
-
-  .note--places::before {
-    content: '';
-    display: block;
-    width: 5px;
-    height: 5px;
-    margin-bottom: 0.75rem;
-    background: var(--color-ash);
-  }
-
-  .note--places::after {
-    width: 1.625rem;
-    margin-top: 1.125rem;
   }
 
   .note--step {
@@ -186,10 +145,6 @@ const [placesNote, stepNote] = roadmapPage.notes;
       left: calc(100% - 1.8125rem);
     }
 
-    .note--places {
-      margin-left: -4.625rem;
-    }
-
     .note--step {
       margin-right: -6.5rem;
     }
@@ -209,17 +164,6 @@ const [placesNote, stepNote] = roadmapPage.notes;
     }
 
     .side {
-      position: relative;
-      inset: auto;
-      height: auto;
-      margin-top: 1.5rem;
-    }
-
-    blockquote::after {
-      margin-left: 0;
-    }
-
-    .side ul {
       display: none;
     }
 
@@ -231,7 +175,6 @@ const [placesNote, stepNote] = roadmapPage.notes;
       padding-top: 0;
     }
 
-    .note--places,
     .note--step {
       width: auto;
     }

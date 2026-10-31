@@ -145,10 +145,6 @@ export const roadmapPage = {
   subtitle: 'Meu caminho como desenvolvedor',
   description:
     'Este roadmap representa a minha evolução como desenvolvedor. Aqui organizo meus estudos, projetos e objetivos de forma visual, para manter o foco e acompanhar o progresso em direção aos meus objetivos na área de tecnologia.',
-  quote: ['Disciplina hoje,', 'liberdade amanhã.'],
   verbs: ['Planejar', 'Estudar', 'Construir', 'Evoluir'],
-  notes: [
-    ['Mesmos lugares.', 'Pessoas diferentes.', 'Novos objetivos.'],
-    ['Um passo de cada vez', 'também é progresso.'],
-  ],
+  note: ['Um passo de cada vez', 'também é progresso.'],
 } as const;
