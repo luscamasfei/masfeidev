@@ -4,28 +4,53 @@ import RoadmapTitle from './RoadmapTitle.astro';
 import { roadmapPage } from '@/data/roadmap';
 ---
 
-<PageHeader eyebrow="Roadmap" title={roadmapPage.title}>
-  <RoadmapTitle slot="title" />
-  <p class="subtitle">{roadmapPage.subtitle}</p>
-  <p class="description">{roadmapPage.description}</p>
-</PageHeader>
+<div class="roadmap-hero">
+  <PageHeader eyebrow="Roadmap" title={roadmapPage.title}>
+    <RoadmapTitle slot="title" />
+    <p class="subtitle">{roadmapPage.subtitle}</p>
+    <p class="description">{roadmapPage.description}</p>
+  </PageHeader>
+</div>
 
 <style>
+  /* Ritmo vertical da referência: título em y 109, subtítulo 202, traço 240, texto 259. */
+  .roadmap-hero :global(.page-head) {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .roadmap-hero :global(.page-head__title) {
+    margin-top: 0.5625rem;
+  }
+
   .subtitle {
-    margin-top: 1.1rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
+    font-size: 0.875rem;
     line-height: 1.3rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--color-paper);
   }
 
+  .subtitle::after {
+    content: '';
+    display: block;
+    width: 4.375rem;
+    height: 1px;
+    margin-top: 1.0625rem;
+    background: linear-gradient(to right, var(--color-line-strong) 60%, transparent);
+  }
+
   .description {
-    margin-top: 0.6rem;
-    max-width: 27rem;
+    margin-top: 1.1rem;
+    max-width: 27.5rem;
     font-size: 0.75rem;
-    line-height: 1.15rem;
-    color: var(--color-ash);
+    line-height: 1.0625rem;
+    color: #d0d0d0;
+  }
+
+  @media (max-width: 479px) {
+    .subtitle {
+      letter-spacing: 0.12em;
+    }
   }
 </style>

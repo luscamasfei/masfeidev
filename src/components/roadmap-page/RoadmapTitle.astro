@@ -12,14 +12,18 @@
 />
 
 <style>
-  /* A arte mantém os pixels fornecidos; a altura segue o h1 compartilhado. */
+  /*
+   * A arte é exibida no tamanho nativo (565 × 93), o mesmo da referência.
+   * O "R" começa a 58 px da borda do arquivo: o recuo alinha a letra à
+   * coluna de texto e deixa os rastros do glitch vazarem para a margem.
+   */
   img {
+    --w: min(35.3125rem, 100vw - 1rem);
     display: block;
-    width: auto;
-    height: 1em;
-    max-width: 100%;
-    object-fit: contain;
-    object-position: left center;
+    width: var(--w);
+    max-width: none;
+    height: auto;
+    margin-left: calc(var(--w) * -0.1027);
     user-select: none;
     pointer-events: none;
   }

@@ -3,6 +3,8 @@ import RoadmapHero from './RoadmapHero.astro';
 import RoadmapBackground from './RoadmapBackground.astro';
 import RoadmapTrack from './RoadmapTrack.astro';
 import { roadmapPage } from '@/data/roadmap';
+
+const [placesNote, stepNote] = roadmapPage.notes;
 ---
 
 <section class="roadmap-page" aria-labelledby="page-title">
@@ -11,7 +13,7 @@ import { roadmapPage } from '@/data/roadmap';
     <div class="roadmap-page__intro">
       <RoadmapHero />
       <aside class="side" aria-label="Direção da jornada">
-        <blockquote>“{roadmapPage.quote[0]}<br />{roadmapPage.quote[1]}”</blockquote>
+        <blockquote>“{roadmapPage.quote[0]}<br />&nbsp;{roadmapPage.quote[1]}”</blockquote>
         <ul aria-label="Princípios da jornada">
           {roadmapPage.verbs.map((verb) => <li>{verb}</li>)}
           <li aria-hidden="true">//</li>
@@ -20,32 +22,46 @@ import { roadmapPage } from '@/data/roadmap';
     </div>
     <RoadmapTrack />
     <div class="notes">
-      {roadmapPage.notes.map((lines) => (
-        <aside class="note">{lines.map((line) => <p>{line}</p>)}</aside>
-      ))}
+      <aside class="note note--places">
+        {placesNote.map((line) => <p>{line}</p>)}
+      </aside>
+      <div class="notes__end">
+        <aside class="note note--step">
+          <p>“{stepNote[0]}<br />&nbsp;{stepNote[1]}”</p>
+        </aside>
+        <p class="section-index page-index" aria-hidden="true">[ 02 ]</p>
+      </div>
     </div>
-    <p class="section-index page-index" aria-hidden="true">[ 02 ]</p>
   </div>
 </section>
 
 <style>
+  /*
+   * A página é uma cena na proporção da referência (1672 × 941) que começa
+   * atrás do cabeçalho, como o hero da home. Tipografia e componentes usam as
+   * medidas da referência em rem; as caixas de nota fecham a cena embaixo.
+   */
   .roadmap-page {
     position: relative;
     isolation: isolate;
-    min-height: calc(100svh - var(--spacing-header));
+    display: flex;
+    flex-direction: column;
+    min-height: max(100svh, 100vw * 941 / 1672);
+    margin-top: calc(-1 * var(--spacing-header));
+    padding-top: var(--spacing-header);
+    overflow-x: clip;
   }
 
   .roadmap-page__content {
-    padding: 3.5rem 0 6rem;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 2.3125rem 0 2.8125rem;
   }
 
   .roadmap-page__intro {
     position: relative;
     isolation: isolate;
-  }
-
-  .roadmap-page__intro :global(.page-head) {
-    border-bottom: 0;
   }
 
   .roadmap-page__intro::before {
@@ -59,56 +75,135 @@ import { roadmapPage } from '@/data/roadmap';
     pointer-events: none;
   }
 
+  /* Citação e verbos seguem o desenho do hero da home. */
   .side {
     position: absolute;
-    top: 0;
-    right: 0;
-    max-width: 12rem;
+    inset: 0 0 auto auto;
+    height: 100%;
     font-size: 0.70625rem;
     font-weight: 500;
+    letter-spacing: 0.06em;
     line-height: 1rem;
     text-transform: uppercase;
-    color: var(--color-paper);
-    text-shadow: 0 0 6px var(--color-void);
+    color: #f2f2f2;
+    text-shadow: 0 0 6px rgb(0 0 0 / 0.95), 0 0 2px rgb(0 0 0 / 0.9);
   }
 
   blockquote {
-    text-align: right;
+    margin-top: 0.8125rem;
+  }
+
+  blockquote::after {
+    content: '';
+    display: block;
+    width: 3.0625rem;
+    height: 1px;
+    margin: 1.4375rem 0 0 auto;
+    background: var(--color-line-strong);
   }
 
   .side ul {
-    margin-top: 2.5rem;
-    padding-left: 1rem;
+    position: absolute;
+    top: 7.1875rem;
+    right: 0;
+    padding: 0.3rem 0 0.5rem 1rem;
     border-left: 1px solid var(--color-line-strong);
-    font-size: 0.6rem;
+    font-size: 0.625rem;
     font-weight: 400;
-    letter-spacing: 0.06em;
+    line-height: 1.0625rem;
     color: var(--color-ash);
   }
 
   .notes {
     display: flex;
+    align-items: flex-end;
     justify-content: space-between;
     gap: 2rem;
-    margin-top: 4rem;
+    margin-top: auto;
+    padding-top: 2rem;
   }
 
   .note {
-    padding: 1.25rem;
-    border: 1px solid var(--color-line-strong);
-    background: rgb(4 4 4 / 0.85);
-    font-size: 0.6875rem;
+    border: 1px solid rgb(255 255 255 / 0.28);
+    background: rgb(4 4 4 / 0.55);
+    font-size: 0.65625rem;
+    letter-spacing: 0.06em;
     line-height: 1rem;
     text-transform: uppercase;
     color: var(--color-paper);
   }
 
-  .page-index {
-    margin-top: 1.5rem;
-    text-align: right;
+  .note::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--color-line-strong);
+  }
+
+  .note--places {
+    width: 13.75rem;
+    padding: 1.1875rem 1.25rem 1.5rem;
+  }
+
+  .note--places::before {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 5px;
+    margin-bottom: 0.75rem;
+    background: var(--color-ash);
+  }
+
+  .note--places::after {
+    width: 1.625rem;
+    margin-top: 1.125rem;
+  }
+
+  .note--step {
+    width: 12.75rem;
+    padding: 1.0625rem 0.9375rem 1.25rem;
+  }
+
+  .note--step::after {
+    width: 2.9375rem;
+    margin-top: 1rem;
+  }
+
+  .notes__end {
+    display: grid;
+    justify-items: end;
+    gap: 1.3rem;
+  }
+
+  /* Em telas largas os elementos laterais ocupam a margem, como no hero. */
+  @media (min-width: 1640px) {
+    .side {
+      right: -1.5rem;
+    }
+
+    .side ul {
+      right: auto;
+      left: calc(100% - 1.8125rem);
+    }
+
+    .note--places {
+      margin-left: -4.625rem;
+    }
+
+    .note--step {
+      margin-right: -6.5rem;
+    }
+
+    .page-index {
+      margin-right: -5.125rem;
+    }
   }
 
   @media (max-width: 1023px) {
+    .roadmap-page {
+      min-height: 0;
+    }
+
     .roadmap-page__intro::before {
       background: rgb(4 4 4 / 0.88);
     }
@@ -116,12 +211,12 @@ import { roadmapPage } from '@/data/roadmap';
     .side {
       position: relative;
       inset: auto;
-      max-width: none;
+      height: auto;
       margin-top: 1.5rem;
     }
 
-    blockquote {
-      text-align: left;
+    blockquote::after {
+      margin-left: 0;
     }
 
     .side ul {
@@ -130,8 +225,15 @@ import { roadmapPage } from '@/data/roadmap';
 
     .notes {
       flex-direction: column;
+      align-items: stretch;
       gap: 1rem;
-      margin-top: 2.5rem;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .note--places,
+    .note--step {
+      width: auto;
     }
   }
 </style>
