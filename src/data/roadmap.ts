@@ -1,15 +1,13 @@
 /*
- * Roadmap da página inicial.
- *
- * Cada fase é um nó do mapa; `connections` liga os nós e aceita ramificações
- * (um nó pode ter várias saídas). As posições usam o plano do mapa desktop,
- * de 1017 × 204 unidades, medido na referência. No mobile o mapa vira um
- * caminho vertical que segue a ordem de `nodes`.
+ * Fases da jornada, na ordem da estrada. A home e a página /roadmap leem esta
+ * mesma lista; cada uma gera a geometria da própria estrada a partir da
+ * quantidade de fases. Para acrescentar uma fase, basta incluí-la aqui.
  */
 
 export type RoadmapStatus = 'in-progress' | 'building';
 
-export type RoadmapIcon = 'java' | 'code' | 'database' | 'cube' | 'brain';
+/** `lock` marca fases ainda não definidas. */
+export type RoadmapIcon = 'java' | 'code' | 'database' | 'cube' | 'brain' | 'lock';
 
 export interface RoadmapLink {
   title: string;
@@ -29,16 +27,8 @@ export interface RoadmapNode {
   title?: string;
   status: RoadmapStatus;
   icon: RoadmapIcon;
-  position: { x: number; y: number };
   /** Conteúdo do painel; só fases com detalhes podem ser abertas. */
   details?: RoadmapDetails;
-}
-
-export interface RoadmapConnection {
-  from: string;
-  to: string;
-  /** Curvatura vertical do trecho; negativo sobe, positivo desce. */
-  bend?: number;
 }
 
 export const roadmapStatusLabel: Record<RoadmapStatus, string> = {
@@ -59,7 +49,6 @@ export const roadmapNodes: RoadmapNode[] = [
     title: 'Java',
     status: 'in-progress',
     icon: 'java',
-    position: { x: 60, y: 68 },
     details: {
       description: 'Primeira fase da jornada: os fundamentos da linguagem Java.',
       topics: [
@@ -76,36 +65,26 @@ export const roadmapNodes: RoadmapNode[] = [
       articles: [],
     },
   },
-  { id: 'fase-02', status: 'building', icon: 'code', position: { x: 278, y: 76 } },
-  { id: 'fase-03', status: 'building', icon: 'database', position: { x: 498, y: 83 } },
-  { id: 'fase-04', status: 'building', icon: 'cube', position: { x: 717, y: 91 } },
-  { id: 'fase-05', status: 'building', icon: 'brain', position: { x: 936, y: 93 } },
+  { id: 'fase-02', status: 'building', icon: 'code' },
+  { id: 'fase-03', status: 'building', icon: 'database' },
+  { id: 'fase-04', status: 'building', icon: 'cube' },
+  { id: 'fase-05', status: 'building', icon: 'brain' },
+  // Fases 06–20: ainda não definidas, apenas marcadores "em construção".
+  ...Array.from({ length: 15 }, (_, i): RoadmapNode => ({
+    id: `fase-${String(i + 6).padStart(2, '0')}`,
+    status: 'building',
+    icon: 'lock',
+  })),
 ];
-
-export const roadmapConnections: RoadmapConnection[] = [
-  { from: 'java', to: 'fase-02', bend: -34 },
-  { from: 'fase-02', to: 'fase-03', bend: 4 },
-  { from: 'fase-03', to: 'fase-04', bend: 2 },
-  { from: 'fase-04', to: 'fase-05', bend: 16 },
-];
-
 
 /*
- * Página /roadmap: o mesmo mapa da home em formato ampliado. As cinco fases da
- * home seguem na mesma ordem e a estrada continua em serpentina com fases
- * ainda não definidas, todas "em construção".
+ * Página /roadmap: as mesmas fases numa serpentina de fileiras de cinco.
+ * Centros na referência de 1672 × 941 px. As quatro primeiras fileiras foram
+ * ajustadas à arte (a fase 08 fica à direita da personagem sentada); fases
+ * além da 20 repetem o desenho das fileiras 3 e 4, mais abaixo.
  */
-export type RoadmapPageNode = Omit<RoadmapNode, 'position' | 'icon'> & {
-  icon: RoadmapIcon | 'lock';
-  /** Centro do nó na referência de 1672 × 941 px. */
-  position: { x: number; y: number };
-};
+export type RoadmapPageNode = RoadmapNode & { position: { x: number; y: number } };
 
-/**
- * Centros dos nós, em quatro fileiras de cinco: a estrada alterna o sentido a
- * cada fileira e contorna pelas laterais, em serpentina. A fase 08 fica à
- * direita da personagem sentada da arte, para a estrada não cobrir a figura.
- */
 const roadmapPagePositions = [
   { x: 190, y: 418 },
   { x: 485, y: 452 },
@@ -129,16 +108,14 @@ const roadmapPagePositions = [
   { x: 240, y: 994 },
 ];
 
-const futurePhases = roadmapPagePositions.length - roadmapNodes.length;
+const pagePosition = (i: number) => {
+  if (i < roadmapPagePositions.length) return roadmapPagePositions[i];
+  const extra = i - roadmapPagePositions.length;
+  const base = roadmapPagePositions[10 + (extra % 10)];
+  return { x: base.x, y: base.y + 388 * (Math.floor(extra / 10) + 1) };
+};
 
-export const roadmapPageNodes: RoadmapPageNode[] = [
-  ...roadmapNodes.map(({ position: _, ...node }): Omit<RoadmapPageNode, 'position'> => node),
-  ...Array.from({ length: futurePhases }, (_, i): Omit<RoadmapPageNode, 'position'> => ({
-    id: `fase-${String(roadmapNodes.length + i + 1).padStart(2, '0')}`,
-    status: 'building',
-    icon: 'lock',
-  })),
-].map((node, i) => ({ ...node, position: roadmapPagePositions[i] }));
+export const roadmapPageNodes: RoadmapPageNode[] = roadmapNodes.map((node, i) => ({ ...node, position: pagePosition(i) }));
 
 export const roadmapPage = {
   title: 'Roadmap',

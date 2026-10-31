@@ -2,50 +2,31 @@
 import Planet from '@/components/roadmap/Planet.astro';
 import RoadmapIcon from '@/components/roadmap/RoadmapIcon.astro';
 import RoadmapPanel from '@/components/roadmap/RoadmapPanel.astro';
-import {
-  roadmapConnections,
-  roadmapIntro,
-  roadmapNodes,
-  roadmapStatusLabel,
-  type RoadmapNode,
-} from '@/data/roadmap';
+import { roadmapIntro, roadmapNodes, roadmapStatusLabel } from '@/data/roadmap';
 
-// Plano do mapa desktop, medido na referência a 1672 px.
-const MAP_W = 1017;
+/*
+ * Estrada horizontal gerada a partir da quantidade de fases. Uma unidade vale
+ * 1 px a 1672 px de tela: o mapa visível tem 1017 × 204 unidades, como na
+ * referência, e cada fase avança 219 unidades. As alturas e curvas seguem um
+ * ciclo de dez; as cinco primeiras repetem a composição aprovada.
+ */
 const MAP_H = 204;
-// No mobile cada fase ocupa uma faixa de 100 unidades num caminho vertical.
-const STEP = 100;
+const START_X = 60;
+const SPACING = 219;
+const END_MARGIN = 81;
+const WAVE_Y = [68, 76, 83, 91, 93, 88, 80, 72, 66, 64];
+const WAVE_BEND = [-34, 4, 2, 16, -18, -10, 14, -12, 6, 20];
 
-const index = new Map(roadmapNodes.map((node, i) => [node.id, i]));
-const narrowPoint = (i: number) => ({ x: i % 2 === 0 ? 32 : 68, y: i * STEP + STEP / 2 });
-const narrowH = roadmapNodes.length * STEP;
-
-const links = roadmapConnections.flatMap(({ from, to, bend = 0 }) => {
-  const a = index.get(from);
-  const b = index.get(to);
-  if (a === undefined || b === undefined) return [];
-  const p = roadmapNodes[a].position;
-  const q = roadmapNodes[b].position;
+const points = roadmapNodes.map((_, i) => ({ x: START_X + i * SPACING, y: WAVE_Y[i % WAVE_Y.length] }));
+const trackW = points[points.length - 1].x + END_MARGIN;
+const links = points.slice(0, -1).map((p, i) => {
+  const q = points[i + 1];
   const dx = (q.x - p.x) * 0.45;
-  const m = narrowPoint(a);
-  const n = narrowPoint(b);
-  const dy = (n.y - m.y) * 0.5;
-  return [{
-    wide: `M${p.x} ${p.y}C${p.x + dx} ${p.y + bend} ${q.x - dx} ${q.y + bend} ${q.x} ${q.y}`,
-    narrow: `M${m.x} ${m.y}C${m.x} ${m.y + dy} ${n.x} ${n.y - dy} ${n.x} ${n.y}`,
-  }];
+  const bend = WAVE_BEND[i % WAVE_BEND.length];
+  return `M${p.x} ${p.y}C${p.x + dx} ${p.y + bend} ${q.x - dx} ${q.y + bend} ${q.x} ${q.y}`;
 });
 
 const pad = (i: number) => String(i + 1).padStart(2, '0');
-const nodeStyle = (node: RoadmapNode, i: number) => {
-  const narrow = narrowPoint(i);
-  return [
-    `--x: ${node.position.x}`,
-    `--y: ${node.position.y}`,
-    `--nx: ${narrow.x}%`,
-    `--ny: ${(narrow.y / narrowH) * 100}%`,
-  ].join('; ');
-};
 ---
 
 <section id="roadmap" class="roadmap" aria-labelledby="roadmap-title">
@@ -57,50 +38,59 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
         <span class="roadmap__title-line">{roadmapIntro.title[1]}</span>
       </h2>
       <p class="roadmap__description">{roadmapIntro.description}</p>
+
+      <div class="roadmap__controls">
+        <button type="button" class="roadmap__step" data-roadmap-step="-1" aria-controls="roadmap-road" aria-label="Voltar na estrada" disabled>
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M6.5 1.5 3 5l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>
+        </button>
+        <button type="button" class="roadmap__step" data-roadmap-step="1" aria-controls="roadmap-road" aria-label="Avançar na estrada">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M3.5 1.5 7 5 3.5 8.5" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>
+        </button>
+      </div>
     </div>
 
-    <div class="roadmap__map" style={`--narrow-h: ${roadmapNodes.length}`}>
+    <div class="roadmap__map" data-roadmap-map>
       <div class="roadmap__horizon" aria-hidden="true">
         <Planet class="roadmap__planet" />
       </div>
 
-      <svg class="roadmap__paths roadmap__paths--wide" viewBox={`0 0 ${MAP_W} ${MAP_H}`} aria-hidden="true" focusable="false">
-        {links.map((link) => <path d={link.wide} />)}
-      </svg>
-      <svg class="roadmap__paths roadmap__paths--narrow" viewBox={`0 0 100 ${narrowH}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        {links.map((link) => <path d={link.narrow} />)}
-      </svg>
+      <div id="roadmap-road" class="roadmap__viewport" tabindex="0" role="region" aria-label="Estrada do roadmap. Arraste para os lados ou use as setas do teclado para ver as próximas fases." data-roadmap-viewport>
+        <div class="roadmap__track" style={`--track-w: ${trackW}`}>
+          <svg class="roadmap__paths" viewBox={`0 0 ${trackW} ${MAP_H}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            {links.map((d) => <path d={d} />)}
+          </svg>
 
-      <ol class="roadmap__nodes" aria-label="Fases do roadmap">
-        {roadmapNodes.map((node, i) => {
-          const status = roadmapStatusLabel[node.status];
-          const body = (
-            <>
-              <span class="node__ring"><RoadmapIcon name={node.icon} class="node__icon" /></span>
-              <span class="node__tag" aria-hidden="true">{pad(i)}</span>
-              <span class="node__label">
-                <span class="sr-only">Fase {pad(i)}: </span>
-                {node.title && <span class="node__title">{node.title}</span>}
-                <span class="node__status">{status}</span>
-              </span>
-            </>
-          );
-          return (
-            <li class:list={['node', `node--${node.status}`]} style={nodeStyle(node, i)}>
-              {node.details ? (
-                <button type="button" class="node__body" aria-expanded="false" aria-controls={`roadmap-panel-${node.id}`} data-roadmap-trigger={node.id}>
-                  {body}
-                </button>
-              ) : (
-                <div class="node__body">{body}</div>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+          <ol class="roadmap__nodes" aria-label="Fases do roadmap">
+            {roadmapNodes.map((node, i) => {
+              const body = (
+                <>
+                  <span class="node__ring"><RoadmapIcon name={node.icon} class="node__icon" /></span>
+                  <span class="node__tag" aria-hidden="true">{pad(i)}</span>
+                  <span class="node__label">
+                    <span class="sr-only">Fase {pad(i)}: </span>
+                    {node.title && <span class="node__title">{node.title}</span>}
+                    <span class="node__status">{roadmapStatusLabel[node.status]}</span>
+                  </span>
+                </>
+              );
+              return (
+                <li class:list={['node', `node--${node.status}`]} style={`--x: ${points[i].x}; --y: ${points[i].y}`}>
+                  {node.details ? (
+                    <button type="button" class="node__body" aria-expanded="false" aria-controls={`roadmap-panel-${node.id}`} data-roadmap-trigger={node.id}>
+                      {body}
+                    </button>
+                  ) : (
+                    <div class="node__body">{body}</div>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
 
       {roadmapNodes.map((node, i) => node.details && (
-        <RoadmapPanel id={node.id} number={pad(i)} title={node.title} status={node.status} details={node.details} style={nodeStyle(node, i)} />
+        <RoadmapPanel id={node.id} number={pad(i)} title={node.title} status={node.status} details={node.details} />
       ))}
     </div>
 
@@ -131,6 +121,7 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
   }
 
   .roadmap__intro {
+    position: relative;
     padding: 1.15rem 0 1.5rem;
   }
 
@@ -188,9 +179,100 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
   }
 
   .roadmap__map {
-    --s: calc(100cqw / 1017);
+    /* Uma unidade da estrada; abaixo de ~600 px de mapa as fases não encolhem mais. */
+    --s: max(100cqw / 1017, 0.6px);
     position: relative;
     container-type: inline-size;
+  }
+
+  /*
+   * Janela rolável da estrada: rolagem nativa (toque, roda, teclado) sem barra
+   * visível; o mouse arrasta pelo script abaixo. As bordas esmaecem enquanto
+   * houver estrada escondida daquele lado.
+   */
+  .roadmap__viewport {
+    --fade-back: 0rem;
+    --fade-forward: 0rem;
+    position: absolute;
+    inset: 0;
+    overflow: auto hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+    scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
+    mask-image: linear-gradient(to right, transparent, #000 var(--fade-back), #000 calc(100% - var(--fade-forward)), transparent);
+    transition: --fade-back 0.3s, --fade-forward 0.3s;
+  }
+
+  .roadmap__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .roadmap__viewport[data-can-back] {
+    --fade-back: 3.5rem;
+  }
+
+  .roadmap__viewport[data-can-forward] {
+    --fade-forward: 3.5rem;
+  }
+
+  .roadmap__viewport.is-dragging {
+    cursor: grabbing;
+  }
+
+  .roadmap__viewport:focus-visible {
+    outline-offset: -1px;
+  }
+
+  /* --lead: folga antes da primeira fase, para o rótulo não encostar na borda no celular. */
+  .roadmap__track {
+    --lead: 0px;
+    position: relative;
+    width: calc(var(--lead) + var(--track-w) * var(--s));
+    height: 100%;
+  }
+
+  @property --fade-back {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0rem;
+  }
+
+  @property --fade-forward {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0rem;
+  }
+
+  .roadmap__controls {
+    position: absolute;
+    right: 2.25rem;
+    bottom: 1.6rem;
+    display: flex;
+    gap: 0.375rem;
+  }
+
+  .roadmap__step {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-void);
+    color: var(--color-ash);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, opacity 0.2s;
+  }
+
+  .roadmap__step:hover:not(:disabled) {
+    border-color: var(--color-paper);
+    color: var(--color-paper);
+  }
+
+  .roadmap__step:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
 
   .roadmap__horizon {
@@ -211,18 +293,15 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
 
   .roadmap__paths {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    top: calc(50% - 102 * var(--s));
+    left: var(--lead);
+    width: calc(100% - var(--lead));
+    height: calc(204 * var(--s));
     overflow: visible;
     fill: none;
     stroke: rgb(255 255 255 / 0.4);
     stroke-width: 1.2;
     stroke-dasharray: 6 5;
-  }
-
-  .roadmap__paths--narrow {
-    display: none;
   }
 
   .roadmap__nodes {
@@ -232,7 +311,7 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
 
   .node {
     position: absolute;
-    left: calc(var(--x) / 1017 * 100%);
+    left: calc(var(--lead) + var(--x) * var(--s));
     top: calc(50% + (var(--y) - 102) * var(--s));
     width: 3.5rem;
     height: 3.5rem;
@@ -372,10 +451,12 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
     box-shadow: 0 0 0 0.3rem var(--color-void), 0 0 0 calc(0.3rem + 1px) var(--color-paper);
   }
 
+  /* O painel fica fora da janela rolável e acompanha o nó (--anchor-x, via script). */
   @media (min-width: 1024px) {
     .roadmap__map :global(.panel) {
       top: 0.75rem;
-      left: calc(var(--x) / 1017 * 100% + 3rem);
+      /* Se o nó sair de vista, o painel para na borda do mapa em vez de sumir. */
+      left: clamp(0px, var(--anchor-x, 0px) + 1rem, 100% - min(25rem, 100% - 5rem));
     }
   }
 
@@ -415,12 +496,17 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
     .roadmap__frame {
       grid-template-columns: 19.5rem minmax(0, 1fr);
     }
+
+    /* Coluna estreita: os botões passam ao canto inferior esquerdo do mapa, que fica livre. */
+    .roadmap__controls {
+      z-index: 2;
+      right: auto;
+      left: 100%;
+      bottom: 0.75rem;
+    }
   }
 
-  /*
-   * Below 1024 px the map turns into a vertical trail: phases zig-zag down the
-   * page and the panel becomes a bottom sheet.
-   */
+  /* Abaixo de 1024 px a mesma estrada horizontal, abaixo da introdução. */
   @media (max-width: 1023px) {
     .roadmap__frame {
       grid-template-columns: 1fr;
@@ -435,44 +521,121 @@ const nodeStyle = (node: RoadmapNode, i: number) => {
     }
 
     .roadmap__map {
-      height: calc(var(--narrow-h) * 8.5rem);
-      max-width: 30rem;
-      width: 100%;
-      margin-inline: auto;
+      height: 12rem;
     }
 
-    .roadmap__horizon :global(.roadmap__planet) {
-      left: -60%;
-      width: 220%;
-      transform: translateY(97%);
+    .roadmap__controls {
+      position: static;
+      justify-content: flex-end;
+      margin-top: 0.75rem;
     }
 
-    .roadmap__paths--wide {
-      display: none;
+    .roadmap__track {
+      --lead: 1.25rem;
     }
 
-    .roadmap__paths--narrow {
-      display: block;
-    }
-
-    .roadmap__paths--narrow path {
-      vector-effect: non-scaling-stroke;
-    }
-
-    .roadmap__nodes {
-      z-index: 1;
-    }
-
-    .node {
-      left: var(--nx);
-      top: var(--ny);
-    }
-
-    /* Keep the trail from running through the labels. */
-    .node__label {
-      padding: 0.15rem 0.4rem;
-      background: var(--color-void);
+    /* Alvos de toque de 44 px. */
+    .roadmap__step {
+      width: 2.75rem;
+      height: 2.75rem;
     }
   }
 </style>
 
+
+<script>
+  import { anchorPanel } from '@/lib/roadmap-panel';
+
+  /*
+   * Estrada arrastável. Toque, roda do mouse e teclado usam a rolagem nativa
+   * da janela; aqui ficam o arraste com mouse, os botões, o estado das bordas
+   * e o painel acompanhando o nó. Religado a cada navegação do ClientRouter.
+   */
+  const DRAG_THRESHOLD = 5;
+  let controller: AbortController | undefined;
+
+  document.addEventListener('astro:page-load', () => {
+    controller?.abort();
+    const viewport = document.querySelector<HTMLElement>('[data-roadmap-viewport]');
+    if (!viewport) return;
+    controller = new AbortController();
+    const { signal } = controller;
+    const steps = [...document.querySelectorAll<HTMLButtonElement>('[data-roadmap-step]')];
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const update = () => {
+      const max = viewport.scrollWidth - viewport.clientWidth;
+      const atStart = viewport.scrollLeft <= 1;
+      const atEnd = viewport.scrollLeft >= max - 1;
+      viewport.toggleAttribute('data-can-back', !atStart);
+      viewport.toggleAttribute('data-can-forward', !atEnd);
+      for (const step of steps) step.disabled = Number(step.dataset.roadmapStep) < 0 ? atStart : atEnd;
+
+      const panel = viewport.parentElement?.querySelector<HTMLElement>('[data-roadmap-panel]:not([hidden])');
+      const trigger = panel && viewport.querySelector<HTMLElement>(`[aria-controls="${panel.id}"]`);
+      if (panel && trigger) anchorPanel(panel, trigger);
+    };
+
+    viewport.addEventListener('scroll', update, { signal, passive: true });
+    const resize = new ResizeObserver(update);
+    resize.observe(viewport);
+    signal.addEventListener('abort', () => resize.disconnect());
+    update();
+
+    for (const step of steps) {
+      step.addEventListener('click', () => {
+        const left = Number(step.dataset.roadmapStep) * viewport.clientWidth * 0.6;
+        viewport.scrollBy({ left, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+      }, { signal });
+    }
+
+    // Arraste com mouse: só vira arraste depois de alguns pixels, para um
+    // clique simples continuar abrindo a fase.
+    let drag: { x: number; left: number; pointer: number } | null = null;
+    let dragged = false;
+
+    viewport.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse' || event.button !== 0) return;
+      drag = { x: event.clientX, left: viewport.scrollLeft, pointer: event.pointerId };
+      dragged = false;
+    }, { signal });
+
+    viewport.addEventListener('pointermove', (event) => {
+      if (!drag || event.pointerId !== drag.pointer) return;
+      const dx = event.clientX - drag.x;
+      if (!dragged) {
+        if (Math.abs(dx) < DRAG_THRESHOLD) return;
+        dragged = true;
+        viewport.setPointerCapture(event.pointerId);
+        viewport.classList.add('is-dragging');
+      }
+      viewport.scrollLeft = drag.left - dx;
+    }, { signal });
+
+    const endDrag = (event: PointerEvent) => {
+      if (!drag || event.pointerId !== drag.pointer) return;
+      drag = null;
+      viewport.classList.remove('is-dragging');
+    };
+    viewport.addEventListener('pointerup', endDrag, { signal });
+    viewport.addEventListener('pointercancel', endDrag, { signal });
+
+    // O clique que encerra um arraste não abre fases.
+    viewport.addEventListener('click', (event) => {
+      if (!dragged) return;
+      dragged = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, { signal, capture: true });
+
+    viewport.addEventListener('dragstart', (event) => event.preventDefault(), { signal });
+
+    // Setas já rolam a janela nativamente; Home e End só rolam na vertical.
+    viewport.addEventListener('keydown', (event) => {
+      if (event.target !== viewport || (event.key !== 'Home' && event.key !== 'End')) return;
+      event.preventDefault();
+      const left = event.key === 'Home' ? 0 : viewport.scrollWidth;
+      viewport.scrollTo({ left, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+    }, { signal });
+  });
+</script>

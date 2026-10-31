@@ -123,6 +123,90 @@
   }
 }
 
+/*
+ * Page transitions (astro:transitions, see src/lib/transitions.ts). Only the
+ * page content animates; the rest of the document swaps instantly so the
+ * header stays still. Interference is a monochrome scanline mask plus a few
+ * pixels of horizontal slip, applied in steps like a broken signal.
+ */
+:root {
+  --scanlines: repeating-linear-gradient(to bottom, #000 0 5px, rgb(0 0 0 / 0.3) 5px 7px);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+@keyframes page-glitch-out {
+  0% {
+    opacity: 1;
+    translate: 0;
+  }
+  35% {
+    opacity: 0.85;
+    translate: -3px 0;
+    mask-image: var(--scanlines);
+    filter: brightness(1.15);
+  }
+  70% {
+    opacity: 0.45;
+    translate: 2px 0;
+    mask-image: var(--scanlines);
+    mask-position: 0 3px;
+    filter: brightness(1.15);
+  }
+  100% {
+    opacity: 0;
+    translate: 0;
+  }
+}
+
+@keyframes page-glitch-in {
+  0% {
+    opacity: 0;
+    translate: 2px 0;
+    mask-image: var(--scanlines);
+  }
+  25% {
+    opacity: 0.6;
+    translate: -1px 0;
+    mask-image: var(--scanlines);
+    mask-position: 0 2px;
+  }
+  45% {
+    opacity: 0.9;
+    translate: 0;
+  }
+  100% {
+    opacity: 1;
+    translate: 0;
+  }
+}
+
+/* Reduced motion: a short plain cross-fade, no slip or interference. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page) {
+    animation: 80ms linear both page-fade-out !important;
+  }
+
+  ::view-transition-new(page) {
+    animation: 120ms linear both page-fade-in !important;
+  }
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Long-form text rendered from Markdown: project pages and logs. */
 .prose-noir {
   font-size: 0.8125rem;
