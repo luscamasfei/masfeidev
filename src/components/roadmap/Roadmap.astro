@@ -455,7 +455,8 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
   @media (min-width: 1024px) {
     .roadmap__map :global(.panel) {
       top: 0.75rem;
-      left: min(var(--anchor-x, 0px) + 1rem, 100% - min(25rem, 100% - 5rem));
+      /* Se o nó sair de vista, o painel para na borda do mapa em vez de sumir. */
+      left: clamp(0px, var(--anchor-x, 0px) + 1rem, 100% - min(25rem, 100% - 5rem));
     }
   }
 
