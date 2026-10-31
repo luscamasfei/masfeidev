@@ -60,14 +60,27 @@ const stepNote = roadmapPage.note;
     position: relative;
   }
 
+  /*
+   * Sombra para a leitura do texto sobre a arte. A elipse chega a zero antes
+   * de todas as bordas da caixa (closest-side), para não desenhar cantos
+   * sobre o brilho do fundo.
+   */
   .roadmap-page__intro::before {
     content: '';
     position: absolute;
     z-index: -1;
-    inset: -3rem -2rem;
-    max-width: 34rem;
-    background: linear-gradient(to right, rgb(4 4 4 / 0.92) 70%, rgb(4 4 4 / 0.8) 85%, transparent);
-    mask-image: radial-gradient(ellipse at 25% 40%, #000 25%, transparent 72%);
+    inset: -6rem auto -5rem -10rem;
+    width: 50rem;
+    background: rgb(4 4 4 / 0.92);
+    mask-image: radial-gradient(
+      closest-side at 45% 50%,
+      #000 40%,
+      rgb(0 0 0 / 0.78) 55%,
+      rgb(0 0 0 / 0.48) 70%,
+      rgb(0 0 0 / 0.2) 84%,
+      rgb(0 0 0 / 0.05) 94%,
+      transparent 100%
+    );
     pointer-events: none;
   }
 
