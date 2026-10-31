@@ -90,18 +90,45 @@ export const roadmapConnections: RoadmapConnection[] = [
 ];
 
 
-/** Visualização expandida; não altera o conteúdo nem as posições do mini-roadmap. */
-export interface RoadmapPageStage {
-  id: string;
-  number: string;
-  title: string;
-  status: RoadmapStatus;
-  icon: RoadmapIcon | 'briefcase';
-  summary: string;
-  active: boolean;
+/*
+ * Página /roadmap: o mesmo mapa da home em formato ampliado. As cinco fases da
+ * home seguem na mesma ordem e a estrada continua em serpentina com fases
+ * ainda não definidas, todas "em construção".
+ */
+export type RoadmapPageNode = Omit<RoadmapNode, 'position' | 'icon'> & {
+  icon: RoadmapIcon | 'lock';
   /** Centro do nó na referência de 1672 × 941 px. */
   position: { x: number; y: number };
-}
+};
+
+/**
+ * Centros dos nós: primeira fileira da esquerda para a direita, volta pela
+ * direita e segunda fileira no sentido oposto. A fase 08 fica à direita da
+ * personagem sentada da arte, para a estrada não cobrir a figura.
+ */
+const roadmapPagePositions = [
+  { x: 190, y: 418 },
+  { x: 485, y: 452 },
+  { x: 790, y: 428 },
+  { x: 1095, y: 462 },
+  { x: 1395, y: 434 },
+  { x: 1425, y: 618 },
+  { x: 1140, y: 646 },
+  { x: 915, y: 598 },
+  { x: 560, y: 646 },
+  { x: 245, y: 612 },
+];
+
+const futurePhases = roadmapPagePositions.length - roadmapNodes.length;
+
+export const roadmapPageNodes: RoadmapPageNode[] = [
+  ...roadmapNodes.map(({ position: _, ...node }): Omit<RoadmapPageNode, 'position'> => node),
+  ...Array.from({ length: futurePhases }, (_, i): Omit<RoadmapPageNode, 'position'> => ({
+    id: `fase-${String(roadmapNodes.length + i + 1).padStart(2, '0')}`,
+    status: 'building',
+    icon: 'lock',
+  })),
+].map((node, i) => ({ ...node, position: roadmapPagePositions[i] }));
 
 export const roadmapPage = {
   title: 'Roadmap',
@@ -115,31 +142,3 @@ export const roadmapPage = {
     ['Um passo de cada vez', 'também é progresso.'],
   ],
 } as const;
-
-export const roadmapPageStages: RoadmapPageStage[] = [
-  {
-    id: 'java', number: '01', title: 'Java', status: 'in-progress', icon: 'java', active: true,
-    summary: 'Aprendendo os fundamentos do Java e desenvolvendo habilidades de programação sólida e orientada a objetos.',
-    position: { x: 188, y: 411 },
-  },
-  {
-    id: 'fundamentos', number: '02', title: 'Fundamentos', status: 'building', icon: 'code', active: false,
-    summary: 'Aprofundando os conceitos de ciência da computação, estruturas de dados, lógica e boas práticas.',
-    position: { x: 483, y: 438 },
-  },
-  {
-    id: 'banco-de-dados', number: '03', title: 'Banco de Dados', status: 'building', icon: 'database', active: false,
-    summary: 'Estudando modelagem de dados, SQL e bancos como PostgreSQL, aprendendo a projetar soluções reais.',
-    position: { x: 820, y: 445 },
-  },
-  {
-    id: 'projetos', number: '04', title: 'Projetos', status: 'building', icon: 'cube', active: false,
-    summary: 'Desenvolvendo projetos práticos para aplicar os conhecimentos e construir um portfólio consistente.',
-    position: { x: 1117, y: 491 },
-  },
-  {
-    id: 'carreira', number: '05', title: 'Carreira', status: 'building', icon: 'briefcase', active: false,
-    summary: 'Conquistando minha primeira oportunidade na área de TI e evoluindo continuamente na minha carreira.',
-    position: { x: 1467, y: 456 },
-  },
-];

@@ -1,63 +1,80 @@
 ---
 import RoadmapIcon from '@/components/roadmap/RoadmapIcon.astro';
-import { roadmapPageStages, roadmapStatusLabel } from '@/data/roadmap';
+import RoadmapPanel from '@/components/roadmap/RoadmapPanel.astro';
+import { roadmapPageNodes, roadmapStatusLabel } from '@/data/roadmap';
 
-// A faixa da estrada na referência de 1672 px: dos cards das pontas (x 92–1597)
-// a partir de y 345, logo abaixo da introdução. Horizontalmente a estrada
-// acompanha a largura da faixa; verticalmente usa pixels reais (1 unidade = 1 px).
-const FRAME = { left: 92, top: 345, width: 1505, height: 344 };
-const points = roadmapPageStages.map((stage) => ({
-  x: stage.position.x - FRAME.left,
-  y: stage.position.y - FRAME.top,
+// Faixa da estrada na referência de 1672 px: x 92–1597 a partir de y 345.
+// Horizontalmente a estrada acompanha a largura da faixa; verticalmente usa
+// pixels reais (1 unidade = 1 px), para os nós não mudarem de tamanho.
+const FRAME = { left: 92, top: 345, width: 1505, height: 376 };
+// Distância da curva de retorno até os nós das pontas da serpentina.
+const TURN = 190;
+// Curvatura de cada trecho; negativo sobe. O trecho 08–09 arqueia por cima da personagem.
+const BENDS = [-32, 32, -32, 32, 0, 32, -32, -44, 32];
+
+const points = roadmapPageNodes.map((node) => ({
+  x: node.position.x - FRAME.left,
+  y: node.position.y - FRAME.top,
 }));
 const links = points.slice(0, -1).map((a, i) => {
   const b = points[i + 1];
+  // Troca de fileira: a estrada contorna pela lateral, como num mapa de fases.
+  if (Math.abs(b.y - a.y) > 100) {
+    const side = a.x > FRAME.width / 2 ? TURN : -TURN;
+    return `M${a.x} ${a.y}C${a.x + side} ${a.y} ${b.x + side} ${b.y} ${b.x} ${b.y}`;
+  }
   const dx = (b.x - a.x) * 0.45;
-  // A curva alterna: sobe entre 01–02 e 03–04, desce entre 02–03 e 04–05.
-  const bend = i % 2 === 0 ? -34 : 34;
+  const bend = BENDS[i] ?? 0;
   return `M${a.x} ${a.y}C${a.x + dx} ${a.y + bend} ${b.x - dx} ${b.y + bend} ${b.x} ${b.y}`;
 });
+
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+const nodeStyle = (i: number) => `--x: ${(points[i].x / FRAME.width) * 100}%; --y: ${points[i].y / 16}rem;`;
 ---
 
 <div class="track" style={`--track-h: ${FRAME.height / 16}rem`}>
-  <h2 class="sr-only">Etapas da jornada</h2>
   <svg class="track__path" viewBox={`0 0 ${FRAME.width} ${FRAME.height}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
     {links.map((d) => <path d={d} />)}
   </svg>
-  <ol aria-label="Etapas da jornada" class="stages">
-    {roadmapPageStages.map((stage, i) => {
-      const p = points[i];
-      return (
-        <li id={`etapa-${stage.id}`} class:list={['stage', { 'stage--active': stage.active }]}
-          aria-current={stage.active ? 'step' : undefined}
-          style={`--x: ${(p.x / FRAME.width) * 100}%; --y: ${p.y / 16}rem;`}>
-          <span class="stage__node" aria-hidden="true">
-            <span class="stage__number">{stage.number}</span>
-            <span class="stage__ring">
-              {stage.icon === 'briefcase' ? (
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V4h8v3M3 12q9 5 18 0M10 13h4v3h-4z" /></svg>
-              ) : <RoadmapIcon name={stage.icon} />}
-            </span>
+  <ol class="nodes" aria-label="Fases do roadmap">
+    {roadmapPageNodes.map((node, i) => {
+      const body = (
+        <>
+          <span class="node__ring"><RoadmapIcon name={node.icon} class="node__icon" /></span>
+          <span class="node__tag" aria-hidden="true">{pad(i)}</span>
+          <span class="node__label">
+            <span class="sr-only">Fase {pad(i)}: </span>
+            {node.title && <span class="node__title">{node.title}</span>}
+            <span class="node__status">{roadmapStatusLabel[node.status]}</span>
           </span>
-          <div class="stage__label">
-            <h3><span class="sr-only">Etapa {stage.number}: </span>{stage.title}</h3>
-            <p class="stage__status">{roadmapStatusLabel[stage.status]}</p>
-          </div>
-          <p class="stage__summary">{stage.summary}</p>
+        </>
+      );
+      return (
+        <li class:list={['node', `node--${node.status}`]} style={nodeStyle(i)}
+          aria-current={node.status === 'in-progress' ? 'step' : undefined}>
+          {node.details ? (
+            <button type="button" class="node__body" aria-expanded="false" aria-controls={`roadmap-panel-${node.id}`} data-roadmap-trigger={node.id}>
+              {body}
+            </button>
+          ) : (
+            <div class="node__body">{body}</div>
+          )}
         </li>
       );
     })}
   </ol>
+
+  {roadmapPageNodes.map((node, i) => node.details && (
+    <RoadmapPanel id={node.id} number={pad(i)} title={node.title} status={node.status} details={node.details} style={nodeStyle(i)} />
+  ))}
 </div>
 
 <style>
   /*
-   * Medidas da referência a 1672 px: nó atual 92 px, demais 72 px; título 11 px
-   * abaixo do anel, selo 8 px abaixo do título e card 10 px abaixo do selo.
-   * O card fica 20 px à direita do eixo do nó, sem sair da faixa.
+   * Mesmo desenho do mini-roadmap da home, ampliado para a página: anéis de
+   * 84 e 64 px, número com haste diagonal e estado abaixo do nó.
    */
   .track {
-    --card-w: 14.375rem;
     position: relative;
     height: var(--track-h);
     /* A faixa avança até 44 px nas margens, como na referência, sem causar rolagem. */
@@ -70,9 +87,10 @@ const links = points.slice(0, -1).map((a, i) => {
     inset: 0;
     width: 100%;
     height: 100%;
+    overflow: visible;
     fill: none;
-    stroke: rgb(255 255 255 / 0.8);
-    stroke-width: 1.5;
+    stroke: rgb(255 255 255 / 0.42);
+    stroke-width: 1.3;
     stroke-dasharray: 6 5;
   }
 
@@ -80,125 +98,161 @@ const links = points.slice(0, -1).map((a, i) => {
     vector-effect: non-scaling-stroke;
   }
 
-  .stages {
+  .nodes {
     position: absolute;
     inset: 0;
   }
 
-  .stage {
-    --d: 4.5rem;
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    color: var(--color-ash);
-  }
-
-  .stage--active {
-    --d: 5.75rem;
-    color: var(--color-paper);
-  }
-
-  .stage > * {
-    pointer-events: auto;
-  }
-
-  .stage__node {
+  .node {
     position: absolute;
     left: var(--x);
     top: var(--y);
-    width: var(--d);
-    height: var(--d);
+    width: 4rem;
+    height: 4rem;
     translate: -50% -50%;
   }
 
-  .stage__ring {
+  .node--in-progress {
+    width: 5.25rem;
+    height: 5.25rem;
+  }
+
+  .node__body {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+  }
+
+  button.node__body {
+    cursor: pointer;
+  }
+
+  .node__ring {
     display: grid;
     place-items: center;
     width: 100%;
     height: 100%;
-    border: 1.5px solid rgb(255 255 255 / 0.78);
+    border: 1.5px solid #555;
     border-radius: 50%;
     background: var(--color-void);
+    color: #6e6e6e;
+    transition: border-color 0.3s, box-shadow 0.3s, color 0.3s;
   }
 
-  .stage__ring :global(svg) {
-    width: 1.875rem;
-    height: 1.875rem;
+  .node__ring :global(.node__icon) {
+    width: 1.75rem;
+    height: 1.75rem;
   }
 
-  .stage--active .stage__ring {
+  .node--in-progress .node__ring {
     border: 2px solid var(--color-paper);
-    box-shadow: 0 0 16px rgb(255 255 255 / 0.32), inset 0 0 10px rgb(255 255 255 / 0.12);
+    color: var(--color-paper);
+    box-shadow: 0 0 16px rgb(255 255 255 / 0.28), inset 0 0 10px rgb(255 255 255 / 0.1);
   }
 
-  .stage--active .stage__ring :global(svg) {
-    width: 2.5rem;
-    height: 2.5rem;
+  .node--in-progress .node__ring :global(.node__icon) {
+    width: 2.375rem;
+    height: 2.375rem;
   }
 
-  .stage__number {
+  /* Número preso ao anel por uma haste diagonal curta. */
+  .node__tag {
     position: absolute;
-    top: -0.875rem;
-    left: 95%;
-    padding: 0.125rem 0.3125rem;
-    background: #bdbdbd;
-    color: var(--color-void);
-    font-size: 0.65625rem;
-    font-weight: 600;
-    line-height: 1rem;
-  }
-
-  .stage--active .stage__number {
-    background: var(--color-paper);
-  }
-
-  .stage__label {
-    position: absolute;
-    left: var(--x);
-    top: calc(var(--y) + var(--d) / 2 + 0.6875rem);
-    translate: -50% 0;
+    left: calc(100% - 0.1rem);
+    top: -1.1rem;
+    min-width: 1.35rem;
+    padding: 0 0.28rem;
+    font-size: 0.6875rem;
+    line-height: 1.05rem;
     text-align: center;
+    background: #444;
+    color: #9a9a9a;
+  }
+
+  .node__tag::before {
+    content: '';
+    position: absolute;
+    left: -0.5rem;
+    top: calc(100% + 0.05rem);
+    width: 0.7rem;
+    height: 1px;
+    background: #444;
+    rotate: -45deg;
+    transform-origin: right center;
+  }
+
+  .node--in-progress .node__tag,
+  .node--in-progress .node__tag::before {
+    background: var(--color-paper);
+    color: var(--color-void);
+  }
+
+  .node--in-progress .node__tag::before {
+    height: 2px;
+  }
+
+  .node__label {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 50%;
+    translate: -50% 0;
+    display: grid;
+    padding: 0.1rem 0.45rem;
+    /* Fundo discreto para o estado continuar legível sobre o horizonte claro da arte. */
+    background: rgb(4 4 4 / 0.72);
     white-space: nowrap;
   }
 
-  h3 {
-    font-size: 0.84375rem;
+  .node__title {
+    font-size: 0.875rem;
     font-weight: 500;
-    line-height: 1rem;
+    line-height: 1.25rem;
     color: var(--color-paper);
   }
 
-  .stage--active h3 {
-    font-size: 0.90625rem;
-  }
-
-  .stage__status {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    border: 1px solid rgb(255 255 255 / 0.62);
-    background: rgb(4 4 4 / 0.7);
-    font-size: 0.6875rem;
+  .node__status {
+    font-size: 0.71875rem;
     letter-spacing: 0.03em;
     line-height: 1rem;
-    text-transform: uppercase;
-    color: var(--color-paper);
+    color: #707070;
   }
 
-  .stage__summary {
-    position: absolute;
-    top: calc(var(--y) + var(--d) / 2 + 4.3125rem);
-    left: clamp(0rem, var(--x) + 1.25rem - var(--card-w) / 2, 100% - var(--card-w));
-    width: var(--card-w);
-    padding: 0.625rem 0.8125rem 0.6875rem;
-    border: 1px solid rgb(255 255 255 / 0.26);
-    background: rgb(4 4 4 / 0.62);
-    font-size: 0.71875rem;
-    line-height: 1.0625rem;
-    color: #cfcfcf;
+  .node--building .node__status {
+    text-transform: lowercase;
   }
 
-  /* Abaixo de 1024 px a estrada vira uma trilha vertical: nó à esquerda, texto à direita. */
+  .node--in-progress .node__status {
+    color: var(--color-ash);
+  }
+
+  button.node__body:hover .node__ring,
+  button.node__body[aria-expanded='true'] .node__ring {
+    box-shadow: 0 0 0 0.35rem var(--color-void), 0 0 0 calc(0.35rem + 1px) rgb(255 255 255 / 0.45), 0 0 18px rgb(255 255 255 / 0.3);
+  }
+
+  button.node__body:focus-visible {
+    outline: none;
+  }
+
+  button.node__body:focus-visible .node__ring {
+    box-shadow: 0 0 0 0.35rem var(--color-void), 0 0 0 calc(0.35rem + 1px) var(--color-paper);
+  }
+
+  @media (min-width: 1024px) {
+    .track :global(.panel) {
+      top: calc(var(--y) - 2.5rem);
+      left: calc(var(--x) + 4rem);
+    }
+  }
+
+  /* Abaixo de 1024 px a estrada vira uma trilha vertical: nó à esquerda, estado à direita. */
   @media (max-width: 1023px) {
     .track {
       height: auto;
@@ -209,53 +263,62 @@ const links = points.slice(0, -1).map((a, i) => {
       display: none;
     }
 
-    .stages {
+    .nodes {
       position: relative;
       display: grid;
-      gap: 2.5rem;
+      gap: 1.75rem;
     }
 
-    .stages::before {
+    .nodes::before {
       content: '';
       position: absolute;
       top: 2rem;
       bottom: 2rem;
-      left: calc(2.875rem - 0.5px);
-      border-left: 1.5px dashed rgb(255 255 255 / 0.6);
+      left: calc(2.625rem - 0.75px);
+      border-left: 1.5px dashed rgb(255 255 255 / 0.4);
     }
 
-    .stage {
-      position: relative;
-      inset: auto;
-      display: grid;
-      grid-template-columns: 5.75rem minmax(0, 1fr);
-      column-gap: 1.25rem;
-      align-items: start;
-    }
-
-    .stage__node {
+    .node {
       position: relative;
       left: auto;
       top: auto;
-      grid-row: span 2;
-      justify-self: center;
+      width: 100%;
+      height: auto;
       translate: none;
     }
 
-    .stage__label {
-      position: static;
-      translate: none;
-      padding-top: 0.75rem;
+    .node__body {
+      display: grid;
+      grid-template-columns: 5.25rem minmax(0, 1fr);
+      column-gap: 1.25rem;
+      align-items: center;
       text-align: left;
-      white-space: normal;
     }
 
-    .stage__summary {
+    .node__ring {
+      justify-self: center;
+      width: 4rem;
+      height: 4rem;
+    }
+
+    .node--in-progress .node__ring {
+      width: 5.25rem;
+      height: 5.25rem;
+    }
+
+    /* O número acompanha o anel, centralizado na coluna de 5.25rem. */
+    .node__tag {
+      left: 4.5rem;
+    }
+
+    .node--in-progress .node__tag {
+      left: 5.15rem;
+    }
+
+    .node__label {
       position: static;
-      grid-column: 2;
-      width: auto;
-      max-width: 22rem;
-      margin-top: 0.625rem;
+      justify-self: start;
+      translate: none;
     }
   }
 </style>
