@@ -68,9 +68,11 @@ const nodeStyle = (i: number) => [
 <div class="track" style={`--track-h: ${FRAME.height / 16}rem; --narrow-rows: ${narrowRows}`}>
   <h2 class="sr-only">Fases da jornada</h2>
   <svg class="track__path track__path--narrow" viewBox={`0 0 ${NARROW.width} ${narrowHeight}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {narrowLinks.map((d) => <path class="track__halo" d={d} />)}
     {narrowLinks.map((d) => <path d={d} />)}
   </svg>
   <svg class="track__path track__path--wide" viewBox={`0 0 ${FRAME.width} ${FRAME.height}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {links.map((d) => <path class="track__halo" d={d} />)}
     {links.map((d) => <path d={d} />)}
   </svg>
   <ol class="nodes" aria-label="Fases do roadmap">
@@ -133,6 +135,14 @@ const nodeStyle = (i: number) => [
 
   .track__path path {
     vector-effect: non-scaling-stroke;
+  }
+
+  /* Faixa escura sob o tracejado: mantém a estrada visível sobre as partes claras da arte. */
+  .track__path .track__halo {
+    stroke: var(--color-void);
+    stroke-opacity: 0.85;
+    stroke-width: 6;
+    stroke-dasharray: none;
   }
 
   .track__path--narrow {
