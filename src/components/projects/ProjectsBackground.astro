@@ -24,11 +24,16 @@ import spaceBridge from '@/assets/projects/space-bridge.png';
 
 <style>
   .scene {
+    /* Curva suave (smoothstep) nas laterais, como no cenário do Roadmap. */
+    --edge-in: transparent 0%, rgb(0 0 0 / 0.06) 2.5%, rgb(0 0 0 / 0.2) 5%, rgb(0 0 0 / 0.38) 7.5%, rgb(0 0 0 / 0.58) 10%, rgb(0 0 0 / 0.76) 12.5%, rgb(0 0 0 / 0.9) 14.5%, #000 16%;
+    --edge-out: #000 84%, rgb(0 0 0 / 0.9) 85.5%, rgb(0 0 0 / 0.76) 87.5%, rgb(0 0 0 / 0.58) 90%, rgb(0 0 0 / 0.38) 92.5%, rgb(0 0 0 / 0.2) 95%, rgb(0 0 0 / 0.06) 97.5%, transparent 100%;
     position: absolute;
     inset: 0;
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
+    /* Base do mesmo preto da página: a arte só clareia sobre ela (lighten). */
+    background: var(--color-void);
   }
 
   .scene :global(.scene__art) {
@@ -38,11 +43,21 @@ import spaceBridge from '@/assets/projects/space-bridge.png';
     width: min(100%, 104.5rem);
     height: auto;
     translate: -50% 0;
+    mix-blend-mode: lighten;
     /* O céu de cima some no preto; a borda inferior também, para não haver corte reto. */
     mask-image:
       linear-gradient(to bottom, transparent 0%, rgb(0 0 0 / 0.15) 22%, rgb(0 0 0 / 0.55) 38%, #000 52%, #000 94%, transparent 100%),
       linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
     mask-composite: intersect;
+  }
+
+  /* Tela mais larga que a arte: as laterais se dissolvem no fundo, sem borda. */
+  @media (min-width: 104.5625rem) {
+    .scene :global(.scene__art) {
+      mask-image:
+        linear-gradient(to bottom, transparent 0%, rgb(0 0 0 / 0.15) 22%, rgb(0 0 0 / 0.55) 38%, #000 52%, #000 94%, transparent 100%),
+        linear-gradient(to right, var(--edge-in), #000 16% 84%, var(--edge-out));
+    }
   }
 
   /* Telas estreitas: a arte é ampliada e centrada entre o horizonte e a ponte. */
