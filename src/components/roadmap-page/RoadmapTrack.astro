@@ -6,11 +6,12 @@ import { roadmapPageNodes, roadmapStatusLabel } from '@/data/roadmap';
 // Faixa da estrada na referência de 1672 px: x 92–1597 a partir de y 345.
 // Horizontalmente a estrada acompanha a largura da faixa; verticalmente usa
 // pixels reais (1 unidade = 1 px), para os nós não mudarem de tamanho.
-const FRAME = { left: 92, top: 345, width: 1505, height: 376 };
+const FRAME = { left: 92, top: 345, width: 1505, height: 760 };
 // Distância da curva de retorno até os nós das pontas da serpentina.
 const TURN = 190;
-// Curvatura de cada trecho; negativo sobe. O trecho 08–09 arqueia por cima da personagem.
-const BENDS = [-32, 32, -32, 32, 0, 32, -32, -44, 32];
+// Curvatura de cada trecho; negativo sobe. O trecho 08–09 arqueia por cima da
+// personagem; os trechos de troca de fileira (0) usam a curva de retorno.
+const BENDS = [-32, 32, -32, 32, 0, 32, -32, -44, 32, 0, -32, 32, -32, 32, 0, 32, -32, 32, -32];
 
 const points = roadmapPageNodes.map((node) => ({
   x: node.position.x - FRAME.left,

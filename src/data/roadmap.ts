@@ -102,9 +102,9 @@ export type RoadmapPageNode = Omit<RoadmapNode, 'position' | 'icon'> & {
 };
 
 /**
- * Centros dos nós: primeira fileira da esquerda para a direita, volta pela
- * direita e segunda fileira no sentido oposto. A fase 08 fica à direita da
- * personagem sentada da arte, para a estrada não cobrir a figura.
+ * Centros dos nós, em quatro fileiras de cinco: a estrada alterna o sentido a
+ * cada fileira e contorna pelas laterais, em serpentina. A fase 08 fica à
+ * direita da personagem sentada da arte, para a estrada não cobrir a figura.
  */
 const roadmapPagePositions = [
   { x: 190, y: 418 },
@@ -117,6 +117,16 @@ const roadmapPagePositions = [
   { x: 915, y: 598 },
   { x: 560, y: 646 },
   { x: 245, y: 612 },
+  { x: 215, y: 806 },
+  { x: 520, y: 840 },
+  { x: 830, y: 802 },
+  { x: 1120, y: 838 },
+  { x: 1410, y: 808 },
+  { x: 1440, y: 992 },
+  { x: 1150, y: 1022 },
+  { x: 850, y: 988 },
+  { x: 545, y: 1022 },
+  { x: 240, y: 994 },
 ];
 
 const futurePhases = roadmapPagePositions.length - roadmapNodes.length;
