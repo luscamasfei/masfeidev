@@ -29,7 +29,7 @@ pnpm preview   # serve o build de produção
 ```text
 src/
   assets/        artes de fundo, otimizadas no build (AVIF e WebP)
-  components/    componentes por área: home, roadmap, roadmap-page, projects, blog, layout, ui
+  components/    componentes por área: home, roadmap, roadmap-page, projects, about, blog, layout, ui
   content/       projetos e posts em Markdown/MDX
   data/          textos fixos: site e menu, home, roadmap, página Sobre
   layouts/       layout base, com metadados, Open Graph e RSS
@@ -66,7 +66,11 @@ Cada post é um arquivo `.md` ou `.mdx` em `src/content/blog/`, com `title`, `su
 ### Textos fixos
 
 - **Página inicial:** `src/data/home.ts`
-- **Página Sobre:** `src/data/about.ts`. Os textos vêm do README do perfil do GitHub.
+- **Página Sobre:** `src/data/about.ts`. Os textos vêm do README do perfil do GitHub. A página tem apresentação, experiências de trabalho, tecnologias e contato, nessa ordem:
+  - **Experiências:** lista `experiences`, com título, período, competências e descrição. Uma experiência sozinha ocupa a largura toda; com duas ou mais, os cartões ficam lado a lado.
+  - **Tecnologias:** duas colunas, "Em uso" e "Em estudo", sem nível de domínio.
+  - **Contato:** lista `contacts`. Um contato sem endereço (`href: null`) aparece como "em breve", sem link. É o caso do LinkedIn por enquanto.
+  - **Cenário:** o horizonte planetário (`src/assets/about/planetary-sunrise.png`) fica preso ao pé da página. Uma curva de gama, aplicada por filtro SVG, escurece os tons médios sem alterar o arquivo.
 - **Nome, descrição e menu do site:** `src/data/site.ts`
 
 ## Roadmap
@@ -81,7 +85,7 @@ As fases ficam numa lista única em `src/data/roadmap.ts` (`roadmapNodes`), na o
 - **Página `/roadmap`** (`src/components/roadmap-page/`):
   - **Estrada:** ampliada em serpentina, em fileiras de cinco. As quatro primeiras fileiras têm posições ajustadas à arte, em `roadmapPagePositions`. Se a lista passar de 20 fases, novas fileiras são criadas automaticamente.
   - **Telas menores:** abaixo de 1024 px, a estrada segue em três colunas.
-- **Títulos animados:** "Lucas Maffei", "Roadmap" e "Projetos" são GIFs em `public/images/`, com um quadro estático (`.png`) exibido quando o sistema pede movimento reduzido. Os títulos de página usam o componente `src/components/ui/GlitchWordmark.astro`.
+- **Títulos animados:** "Lucas Maffei", "Roadmap", "Projetos" e "Sobre" são GIFs em `public/images/`, com um quadro estático (`.png`) exibido quando o sistema pede movimento reduzido. Os títulos de página usam o componente `src/components/ui/GlitchWordmark.astro`.
 
 ## Transições entre páginas
 
