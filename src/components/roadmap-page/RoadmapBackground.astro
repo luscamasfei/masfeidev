@@ -44,12 +44,25 @@ const stars = Array.from({ length: 180 }, (_, index) => ({
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
-    background: var(--color-void);
+    /*
+     * Brilho suave no centro, em cores opacas que terminam exatamente no preto
+     * da página (#040404). Com transparência, a cauda do degradê arredondava
+     * para um tom mais escuro e desenhava uma elipse.
+     */
+    background: radial-gradient(
+      ellipse 58% 60% at 50% 42%,
+      rgb(10.3 10.3 10.3) 0%,
+      rgb(9.7 9.7 9.7) 18%,
+      rgb(8.5 8.5 8.5) 36%,
+      rgb(6.9 6.9 6.9) 54%,
+      rgb(5.4 5.4 5.4) 70%,
+      rgb(4.5 4.5 4.5) 84%,
+      var(--color-void) 100%
+    );
   }
   .background__stars {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 50% 42%, rgb(180 185 190 / 0.035), transparent 72%);
     mask-image: radial-gradient(ellipse at 50% 40%, #000 38%, rgb(0 0 0 / 0.3) 100%);
   }
   .background__stars span {
@@ -65,6 +78,8 @@ const stars = Array.from({ length: 180 }, (_, index) => ({
     height: auto;
     margin-inline: auto;
     filter: brightness(0.8) contrast(1.04);
+    /* O preto da arte é mais escuro que o da página: só os tons claros aparecem. */
+    mix-blend-mode: lighten;
     /*
      * Máscara elíptica, centrada entre a lua e a personagem, multiplicada por
      * uma proteção estreita em cada borda: a arte some antes do limite da
@@ -100,6 +115,7 @@ const stars = Array.from({ length: 180 }, (_, index) => ({
       transform: translateX(-50%);
       height: auto;
       filter: brightness(0.8) contrast(1.04);
+      mix-blend-mode: lighten;
       object-fit: contain;
       object-position: center bottom;
       mask-image:
