@@ -88,3 +88,63 @@ export const roadmapConnections: RoadmapConnection[] = [
   { from: 'fase-03', to: 'fase-04', bend: 2 },
   { from: 'fase-04', to: 'fase-05', bend: 16 },
 ];
+
+
+/*
+ * Página /roadmap: o mesmo mapa da home em formato ampliado. As cinco fases da
+ * home seguem na mesma ordem e a estrada continua em serpentina com fases
+ * ainda não definidas, todas "em construção".
+ */
+export type RoadmapPageNode = Omit<RoadmapNode, 'position' | 'icon'> & {
+  icon: RoadmapIcon | 'lock';
+  /** Centro do nó na referência de 1672 × 941 px. */
+  position: { x: number; y: number };
+};
+
+/**
+ * Centros dos nós, em quatro fileiras de cinco: a estrada alterna o sentido a
+ * cada fileira e contorna pelas laterais, em serpentina. A fase 08 fica à
+ * direita da personagem sentada da arte, para a estrada não cobrir a figura.
+ */
+const roadmapPagePositions = [
+  { x: 190, y: 418 },
+  { x: 485, y: 452 },
+  { x: 790, y: 428 },
+  { x: 1095, y: 462 },
+  { x: 1395, y: 434 },
+  { x: 1425, y: 618 },
+  { x: 1140, y: 646 },
+  { x: 915, y: 598 },
+  { x: 560, y: 646 },
+  { x: 245, y: 612 },
+  { x: 215, y: 806 },
+  { x: 520, y: 840 },
+  { x: 830, y: 802 },
+  { x: 1120, y: 838 },
+  { x: 1410, y: 808 },
+  { x: 1440, y: 992 },
+  { x: 1150, y: 1022 },
+  { x: 850, y: 988 },
+  { x: 545, y: 1022 },
+  { x: 240, y: 994 },
+];
+
+const futurePhases = roadmapPagePositions.length - roadmapNodes.length;
+
+export const roadmapPageNodes: RoadmapPageNode[] = [
+  ...roadmapNodes.map(({ position: _, ...node }): Omit<RoadmapPageNode, 'position'> => node),
+  ...Array.from({ length: futurePhases }, (_, i): Omit<RoadmapPageNode, 'position'> => ({
+    id: `fase-${String(roadmapNodes.length + i + 1).padStart(2, '0')}`,
+    status: 'building',
+    icon: 'lock',
+  })),
+].map((node, i) => ({ ...node, position: roadmapPagePositions[i] }));
+
+export const roadmapPage = {
+  title: 'Roadmap',
+  subtitle: 'Meu caminho como desenvolvedor',
+  description:
+    'Este roadmap representa a minha evolução como desenvolvedor. Aqui organizo meus estudos, projetos e objetivos de forma visual, para manter o foco e acompanhar o progresso em direção aos meus objetivos na área de tecnologia.',
+  verbs: ['Planejar', 'Estudar', 'Construir', 'Evoluir'],
+  note: ['Um passo de cada vez', 'também é progresso.'],
+} as const;

@@ -1,0 +1,182 @@
+---
+import RoadmapHero from './RoadmapHero.astro';
+import RoadmapBackground from './RoadmapBackground.astro';
+import RoadmapTrack from './RoadmapTrack.astro';
+import { roadmapPage } from '@/data/roadmap';
+
+const stepNote = roadmapPage.note;
+---
+
+<section class="roadmap-page" aria-labelledby="page-title">
+  <RoadmapBackground />
+  <div class="site-container roadmap-page__content">
+    <div class="roadmap-page__intro">
+      <RoadmapHero />
+      <aside class="side" aria-label="Direção da jornada">
+        <ul aria-label="Princípios da jornada">
+          {roadmapPage.verbs.map((verb) => <li>{verb}</li>)}
+          <li aria-hidden="true">//</li>
+        </ul>
+      </aside>
+    </div>
+    <RoadmapTrack />
+    <div class="notes">
+      <div class="notes__end">
+        <aside class="note note--step">
+          <p>“{stepNote[0]}<br />&nbsp;{stepNote[1]}”</p>
+        </aside>
+        <p class="section-index page-index" aria-hidden="true">[ 02 ]</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /*
+   * A página é uma cena na proporção da referência (1672 × 941) que começa
+   * atrás do cabeçalho, como o hero da home. Tipografia e componentes usam as
+   * medidas da referência em rem; as caixas de nota fecham a cena embaixo.
+   */
+  .roadmap-page {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-height: max(100svh, 100vw * 941 / 1672);
+    margin-top: calc(-1 * var(--spacing-header));
+    padding-top: var(--spacing-header);
+    overflow-x: clip;
+  }
+
+  .roadmap-page__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 2.3125rem 0 2.8125rem;
+  }
+
+  /* Sem isolamento próprio: o título em GIF se mistura (screen) com a arte do fundo. */
+  .roadmap-page__intro {
+    position: relative;
+  }
+
+  .roadmap-page__intro::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -3rem -2rem;
+    max-width: 34rem;
+    background: linear-gradient(to right, rgb(4 4 4 / 0.92) 70%, rgb(4 4 4 / 0.8) 85%, transparent);
+    mask-image: radial-gradient(ellipse at 25% 40%, #000 25%, transparent 72%);
+    pointer-events: none;
+  }
+
+  /* Os verbos seguem o desenho do hero da home. */
+  .side {
+    position: absolute;
+    inset: 0 0 auto auto;
+    height: 100%;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 0 0 6px rgb(0 0 0 / 0.95), 0 0 2px rgb(0 0 0 / 0.9);
+  }
+
+  .side ul {
+    position: absolute;
+    top: 7.1875rem;
+    right: 0;
+    padding: 0.3rem 0 0.5rem 1rem;
+    border-left: 1px solid var(--color-line-strong);
+    font-size: 0.625rem;
+    font-weight: 400;
+    line-height: 1.0625rem;
+    color: var(--color-ash);
+  }
+
+  .notes {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 2rem;
+  }
+
+  .note {
+    border: 1px solid rgb(255 255 255 / 0.28);
+    background: rgb(4 4 4 / 0.55);
+    font-size: 0.65625rem;
+    letter-spacing: 0.06em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-paper);
+  }
+
+  .note::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--color-line-strong);
+  }
+
+  .note--step {
+    width: 12.75rem;
+    padding: 1.0625rem 0.9375rem 1.25rem;
+  }
+
+  .note--step::after {
+    width: 2.9375rem;
+    margin-top: 1rem;
+  }
+
+  .notes__end {
+    display: grid;
+    justify-items: end;
+    gap: 1.3rem;
+  }
+
+  /* Em telas largas os elementos laterais ocupam a margem, como no hero. */
+  @media (min-width: 1640px) {
+    .side {
+      right: -1.5rem;
+    }
+
+    .side ul {
+      right: auto;
+      left: calc(100% - 1.8125rem);
+    }
+
+    .note--step {
+      margin-right: -6.5rem;
+    }
+
+    .page-index {
+      margin-right: -5.125rem;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .roadmap-page {
+      min-height: 0;
+    }
+
+    .roadmap-page__intro::before {
+      background: rgb(4 4 4 / 0.88);
+    }
+
+    .side {
+      display: none;
+    }
+
+    .notes {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .note--step {
+      width: auto;
+    }
+  }
+</style>

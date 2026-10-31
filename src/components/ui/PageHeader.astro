@@ -12,7 +12,7 @@ const { eyebrow, title, description, index } = Astro.props;
 
 <header class="page-head">
   <p class="page-head__eyebrow">// {eyebrow}</p>
-  <h1 id="page-title" class="page-head__title">{title}</h1>
+  <h1 id="page-title" class="page-head__title"><slot name="title">{title}</slot></h1>
   {description && <p class="page-head__description">{description}</p>}
   {index && <p class="section-index page-head__index" aria-hidden="true">[ {index} ]</p>}
   <slot />

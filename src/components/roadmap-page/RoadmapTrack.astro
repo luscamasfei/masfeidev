@@ -1,0 +1,339 @@
+---
+import RoadmapIcon from '@/components/roadmap/RoadmapIcon.astro';
+import RoadmapPanel from '@/components/roadmap/RoadmapPanel.astro';
+import { roadmapPageNodes, roadmapStatusLabel } from '@/data/roadmap';
+
+// Faixa da estrada na referência de 1672 px: x 92–1597 a partir de y 345.
+// Horizontalmente a estrada acompanha a largura da faixa; verticalmente usa
+// pixels reais (1 unidade = 1 px), para os nós não mudarem de tamanho.
+const FRAME = { left: 92, top: 345, width: 1505, height: 760 };
+// Distância da curva de retorno até os nós das pontas da serpentina.
+const TURN = 190;
+// Curvatura de cada trecho; negativo sobe. O trecho 08–09 arqueia por cima da
+// personagem; os trechos de troca de fileira (0) usam a curva de retorno.
+const BENDS = [-32, 32, -32, 32, 0, 32, -32, -44, 32, 0, -32, 32, -32, 32, 0, 32, -32, 32, -32];
+
+const points = roadmapPageNodes.map((node) => ({
+  x: node.position.x - FRAME.left,
+  y: node.position.y - FRAME.top,
+}));
+const links = points.slice(0, -1).map((a, i) => {
+  const b = points[i + 1];
+  // Troca de fileira: a estrada contorna pela lateral, como num mapa de fases.
+  if (Math.abs(b.y - a.y) > 100) {
+    const side = a.x > FRAME.width / 2 ? TURN : -TURN;
+    return `M${a.x} ${a.y}C${a.x + side} ${a.y} ${b.x + side} ${b.y} ${b.x} ${b.y}`;
+  }
+  const dx = (b.x - a.x) * 0.45;
+  const bend = BENDS[i] ?? 0;
+  return `M${a.x} ${a.y}C${a.x + dx} ${a.y + bend} ${b.x - dx} ${b.y + bend} ${b.x} ${b.y}`;
+});
+
+// Abaixo de 1024 px a mesma serpentina em três colunas: plano de 300 unidades
+// de largura e fileiras de 150 unidades (cada uma ocupa 9rem na tela).
+const NARROW = { width: 300, cols: 3, row: 150, turn: 46 };
+const narrowRows = Math.ceil(points.length / NARROW.cols);
+const narrowHeight = narrowRows * NARROW.row;
+const narrowPoints = points.map((_, i) => {
+  const row = Math.floor(i / NARROW.cols);
+  const col = i % NARROW.cols;
+  const slot = row % 2 === 0 ? col : NARROW.cols - 1 - col;
+  return { x: (slot + 0.5) * (NARROW.width / NARROW.cols), y: row * NARROW.row + NARROW.row / 2 };
+});
+const narrowLinks = narrowPoints.slice(0, -1).map((a, i) => {
+  const b = narrowPoints[i + 1];
+  if (b.y !== a.y) {
+    const side = a.x > NARROW.width / 2 ? NARROW.turn : -NARROW.turn;
+    return `M${a.x} ${a.y}C${a.x + side} ${a.y} ${b.x + side} ${b.y} ${b.x} ${b.y}`;
+  }
+  const dx = (b.x - a.x) * 0.45;
+  const bend = i % 2 === 0 ? -14 : 14;
+  return `M${a.x} ${a.y}C${a.x + dx} ${a.y + bend} ${b.x - dx} ${b.y + bend} ${b.x} ${b.y}`;
+});
+
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+const nodeStyle = (i: number) => [
+  `--x: ${(points[i].x / FRAME.width) * 100}%`,
+  `--y: ${points[i].y / 16}rem`,
+  `--nx: ${(narrowPoints[i].x / NARROW.width) * 100}%`,
+  `--ny: ${(narrowPoints[i].y / narrowHeight) * 100}%`,
+].join('; ');
+---
+
+<div class="track" style={`--track-h: ${FRAME.height / 16}rem; --narrow-rows: ${narrowRows}`}>
+  <h2 class="sr-only">Fases da jornada</h2>
+  <svg class="track__path track__path--narrow" viewBox={`0 0 ${NARROW.width} ${narrowHeight}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {narrowLinks.map((d) => <path d={d} />)}
+  </svg>
+  <svg class="track__path track__path--wide" viewBox={`0 0 ${FRAME.width} ${FRAME.height}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {links.map((d) => <path d={d} />)}
+  </svg>
+  <ol class="nodes" aria-label="Fases do roadmap">
+    {roadmapPageNodes.map((node, i) => {
+      const body = (
+        <>
+          <span class="node__ring"><RoadmapIcon name={node.icon} class="node__icon" /></span>
+          <span class="node__tag" aria-hidden="true">{pad(i)}</span>
+          <span class="node__label">
+            <span class="sr-only">Fase {pad(i)}: </span>
+            {node.title && <span class="node__title">{node.title}</span>}
+            <span class="node__status">{roadmapStatusLabel[node.status]}</span>
+          </span>
+        </>
+      );
+      return (
+        <li class:list={['node', `node--${node.status}`]} style={nodeStyle(i)}
+          aria-current={node.status === 'in-progress' ? 'step' : undefined}>
+          {node.details ? (
+            <button type="button" class="node__body" aria-expanded="false" aria-controls={`roadmap-panel-${node.id}`} data-roadmap-trigger={node.id}>
+              {body}
+            </button>
+          ) : (
+            <div class="node__body">{body}</div>
+          )}
+        </li>
+      );
+    })}
+  </ol>
+
+  {roadmapPageNodes.map((node, i) => node.details && (
+    <RoadmapPanel id={node.id} number={pad(i)} title={node.title} status={node.status} details={node.details} style={nodeStyle(i)} />
+  ))}
+</div>
+
+<style>
+  /*
+   * Mesmo desenho do mini-roadmap da home, ampliado para a página: anéis de
+   * 84 e 64 px, número com haste diagonal e estado abaixo do nó.
+   */
+  .track {
+    position: relative;
+    height: var(--track-h);
+    /* A faixa avança até 44 px nas margens, como na referência, sem causar rolagem. */
+    margin-inline: calc(-1 * clamp(0rem, (100vw - 100%) / 2 - 1.25rem, 2.75rem));
+    margin-top: 1.15rem;
+  }
+
+  .track__path {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: none;
+    stroke: rgb(255 255 255 / 0.42);
+    stroke-width: 1.3;
+    stroke-dasharray: 6 5;
+  }
+
+  .track__path path {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .track__path--narrow {
+    display: none;
+  }
+
+  .nodes {
+    position: absolute;
+    inset: 0;
+  }
+
+  .node {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 4rem;
+    height: 4rem;
+    translate: -50% -50%;
+  }
+
+  .node--in-progress {
+    width: 5.25rem;
+    height: 5.25rem;
+  }
+
+  .node__body {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+  }
+
+  button.node__body {
+    cursor: pointer;
+  }
+
+  .node__ring {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 1.5px solid #555;
+    border-radius: 50%;
+    background: var(--color-void);
+    color: #6e6e6e;
+    transition: border-color 0.3s, box-shadow 0.3s, color 0.3s;
+  }
+
+  .node__ring :global(.node__icon) {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .node--in-progress .node__ring {
+    border: 2px solid var(--color-paper);
+    color: var(--color-paper);
+    box-shadow: 0 0 16px rgb(255 255 255 / 0.28), inset 0 0 10px rgb(255 255 255 / 0.1);
+  }
+
+  .node--in-progress .node__ring :global(.node__icon) {
+    width: 2.375rem;
+    height: 2.375rem;
+  }
+
+  /* Número preso ao anel por uma haste diagonal curta. */
+  .node__tag {
+    position: absolute;
+    left: calc(100% - 0.1rem);
+    top: -1.1rem;
+    min-width: 1.35rem;
+    padding: 0 0.28rem;
+    font-size: 0.6875rem;
+    line-height: 1.05rem;
+    text-align: center;
+    background: #444;
+    color: #9a9a9a;
+  }
+
+  .node__tag::before {
+    content: '';
+    position: absolute;
+    left: -0.5rem;
+    top: calc(100% + 0.05rem);
+    width: 0.7rem;
+    height: 1px;
+    background: #444;
+    rotate: -45deg;
+    transform-origin: right center;
+  }
+
+  .node--in-progress .node__tag,
+  .node--in-progress .node__tag::before {
+    background: var(--color-paper);
+    color: var(--color-void);
+  }
+
+  .node--in-progress .node__tag::before {
+    height: 2px;
+  }
+
+  .node__label {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 50%;
+    translate: -50% 0;
+    display: grid;
+    padding: 0.1rem 0.45rem;
+    /* Fundo discreto para o estado continuar legível sobre o horizonte claro da arte. */
+    background: rgb(4 4 4 / 0.72);
+    white-space: nowrap;
+  }
+
+  .node__title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    color: var(--color-paper);
+  }
+
+  .node__status {
+    font-size: 0.71875rem;
+    letter-spacing: 0.03em;
+    line-height: 1rem;
+    /* Um pouco mais claro que na home: contraste mínimo de 4,5:1 sobre o fundo escuro. */
+    color: #7d7d7d;
+  }
+
+  .node--building .node__status {
+    text-transform: lowercase;
+  }
+
+  .node--in-progress .node__status {
+    color: var(--color-ash);
+  }
+
+  button.node__body:hover .node__ring,
+  button.node__body[aria-expanded='true'] .node__ring {
+    box-shadow: 0 0 0 0.35rem var(--color-void), 0 0 0 calc(0.35rem + 1px) rgb(255 255 255 / 0.45), 0 0 18px rgb(255 255 255 / 0.3);
+  }
+
+  button.node__body:focus-visible {
+    outline: none;
+  }
+
+  button.node__body:focus-visible .node__ring {
+    box-shadow: 0 0 0 0.35rem var(--color-void), 0 0 0 calc(0.35rem + 1px) var(--color-paper);
+  }
+
+  @media (min-width: 1024px) {
+    .track :global(.panel) {
+      top: calc(var(--y) - 2.5rem);
+      left: calc(var(--x) + 4rem);
+    }
+  }
+
+  /* Abaixo de 1024 px: serpentina de três colunas, com o painel como folha na base da tela. */
+  @media (max-width: 1023px) {
+    .track {
+      height: calc(var(--narrow-rows) * 9rem);
+      margin: 2.5rem 0 3rem;
+    }
+
+    .track__path--wide {
+      display: none;
+    }
+
+    .track__path--narrow {
+      display: block;
+    }
+
+    .node {
+      left: var(--nx);
+      top: var(--ny);
+    }
+  }
+
+  @media (max-width: 479px) {
+    .node {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+
+    .node--in-progress {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+
+    .node__ring :global(.node__icon) {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .node--in-progress .node__ring :global(.node__icon) {
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .node__status {
+      font-size: 0.6875rem;
+      letter-spacing: 0;
+    }
+  }
+</style>

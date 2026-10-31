@@ -1,0 +1,46 @@
+<span class="sr-only">Roadmap</span>
+<picture class="title-art">
+  <source media="(prefers-reduced-motion: reduce)" srcset="/images/roadmap-glitch.png" />
+  <img
+    src="/images/roadmap-glitch.gif"
+    width="601"
+    height="93"
+    alt=""
+    aria-hidden="true"
+    draggable="false"
+    loading="eager"
+    decoding="async"
+    fetchpriority="high"
+  />
+</picture>
+
+<style>
+  /*
+   * Título animado fornecido pelo autor, no mesmo formato do título da home:
+   * GIF com fundo preto (removido por mix-blend-mode) e um quadro estático
+   * para movimento reduzido. A arte é exibida no tamanho nativo (601 × 93);
+   * o "R" começa a 74 px da borda, e o recuo o alinha à coluna de texto,
+   * deixando os rastros do glitch vazarem para a margem.
+   */
+  .title-art {
+    --w: min(37.5625rem, 100vw - 1rem);
+    display: block;
+    width: var(--w);
+    margin-left: calc(var(--w) * -0.1231);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    filter: contrast(1.2);
+    mix-blend-mode: screen;
+    mask-image:
+      linear-gradient(to right, transparent, #000 3%, #000 97%, transparent),
+      linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+    mask-composite: intersect;
+    user-select: none;
+    pointer-events: none;
+  }
+</style>
