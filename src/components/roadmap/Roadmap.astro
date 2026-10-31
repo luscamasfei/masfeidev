@@ -496,6 +496,14 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
     .roadmap__frame {
       grid-template-columns: 19.5rem minmax(0, 1fr);
     }
+
+    /* Coluna estreita: os botões passam ao canto inferior esquerdo do mapa, que fica livre. */
+    .roadmap__controls {
+      z-index: 2;
+      right: auto;
+      left: 100%;
+      bottom: 0.75rem;
+    }
   }
 
   /* Abaixo de 1024 px a mesma estrada horizontal, abaixo da introdução. */
