@@ -48,6 +48,22 @@ import { about } from '@/data/about';
         })}
       </ul>
     </section>
+
+    <section class="block" aria-labelledby="stacks-title">
+      <h2 id="stacks-title" class="block__head">
+        <span>// Stacks &amp; ferramentas</span>
+        <span class="section-index" aria-hidden="true">[ 03 ]</span>
+      </h2>
+      <div class="stacks">
+        {about.stacks.map((group) => (
+          <div class="stack">
+            <h3 class="stack__title">{group.title}</h3>
+            <p class="stack__description">{group.description}</p>
+            <ul class="stack__tags">{group.items.map((item) => <li>{item}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </section>
   </section>
 </BaseLayout>
 
@@ -221,9 +237,63 @@ import { about } from '@/data/about';
     font-size: 1.25rem;
   }
 
+  /*
+   * Mesma grade dos cartões: a coluna "Em estudo" começa na borda do segundo
+   * cartão; a da esquerda é recuada e fechada por uma linha vertical.
+   */
+  .stacks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 2.1875rem;
+    margin-top: 0.875rem;
+  }
+
+  .stack:first-child {
+    margin-right: 1.9375rem;
+    padding-left: 0.9375rem;
+    border-right: 1px solid var(--rule);
+  }
+
+  .stack__title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.5rem;
+    color: var(--color-paper);
+  }
+
+  .stack__description {
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    line-height: 1.25rem;
+    color: var(--color-ash);
+  }
+
+  .stack__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 0.6875rem;
+  }
+
+  .stack__tags li {
+    padding: 0 0.8125rem;
+    border: 1px solid var(--rule);
+    font-size: 0.75rem;
+    line-height: 1.4375rem;
+    color: var(--color-paper);
+  }
+
   @media (max-width: 899px) {
-    .jobs {
+    .jobs,
+    .stacks {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stack:first-child {
+      margin-right: 0;
+      padding-left: 0;
+      border-right: 0;
     }
   }
 

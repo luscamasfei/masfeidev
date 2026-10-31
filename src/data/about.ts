@@ -33,11 +33,20 @@ export const about = {
   /** Palavras do detalhe decorativo ao lado da apresentação. */
   keywords: ['Tecnologia', 'Estudo', 'Projetos', 'Evolução'],
   experiences,
-  technologies: {
-    note: 'Java é meu foco atual de estudos. Python também faz parte das tecnologias com que tenho contato. Esta seleção não representa domínio avançado.',
-    groups: [
-      { label: 'Linguagens', items: ['Java', 'Python'] },
-      { label: 'Ferramentas e sistemas', items: ['Git', 'GitHub', 'Linux', 'Arch Linux', 'VS Code'] },
-    ],
-  },
+  /*
+   * Tecnologias separadas por uso, sem nível de domínio. Fonte: README do
+   * perfil do GitHub; HTML, CSS e JavaScript ficam de fora por decisão do autor.
+   */
+  stacks: [
+    {
+      title: 'Em uso',
+      description: 'Tecnologias que já utilizo em estudos, projetos e no dia a dia.',
+      items: ['Java', 'Git', 'GitHub', 'Linux'],
+    },
+    {
+      title: 'Em estudo',
+      description: 'Tecnologias que estou aprofundando para evoluir na área.',
+      items: ['Python'],
+    },
+  ],
 } as const;
