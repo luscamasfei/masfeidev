@@ -2,7 +2,7 @@ export const site = {
   name: 'Lucas Maffei',
   title: 'Lucas Maffei · Portfólio',
   description:
-    'Portfólio e logs de Lucas Maffei, estudante de Sistemas de Informação documentando a jornada no desenvolvimento de software.',
+    'Portfólio e blog de Lucas Maffei, estudante de Sistemas de Informação documentando a jornada no desenvolvimento de software.',
   locale: 'pt-BR',
   github: 'https://github.com/luscamasfei',
 } as const;

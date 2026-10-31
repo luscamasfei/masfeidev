@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://masfeidev.vercel.app/sitemap.xml

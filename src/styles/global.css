@@ -10,7 +10,7 @@
   --color-ink: #0c0c0c;
   --color-paper: #e5e5e5;
   --color-ash: #a3a3a3;
-  --color-smoke: #6e6e6e;
+  --color-smoke: #787878; /* menor cinza para texto: contraste de 4,5:1 sobre --color-void */
   --color-soot: #3a3a3a;
   --color-line: rgb(255 255 255 / 0.12);
   --color-line-strong: rgb(255 255 255 / 0.32);

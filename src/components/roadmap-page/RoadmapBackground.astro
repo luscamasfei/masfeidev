@@ -1,5 +1,13 @@
 ---
+import { Picture } from 'astro:assets';
 import cosmicJourney from '@/assets/roadmap/cosmic-journey.png';
+
+// AVIF e WebP em alta qualidade: as estrelas e a textura continuam nítidas
+// com uma fração do peso do PNG original (2,4 MB). As duas cópias usam os
+// mesmos arquivos, então o navegador baixa a arte uma vez só.
+const widths = [828, 1254, 1672];
+const sizes = 'min(100vw - 2.5rem, 87.5rem)';
+const pictureAttributes = { style: 'display: contents' };
 
 // Distribuição determinística: o céu permanece estático entre renderizações.
 const stars = Array.from({ length: 180 }, (_, index) => ({
@@ -10,32 +18,16 @@ const stars = Array.from({ length: 180 }, (_, index) => ({
 }));
 ---
 
-<!-- PNG original: mantém estrelas e texturas sem compressão com perdas. -->
 <div class="background" aria-hidden="true">
   <div class="background__stars">
     {stars.map((star) => (
       <span style={`left:${star.x}%;top:${star.y}%;width:${star.size}px;height:${star.size}px;opacity:${star.opacity}`} />
     ))}
   </div>
-  <img
-    src={cosmicJourney.src}
-    width={cosmicJourney.width}
-    height={cosmicJourney.height}
-    decoding="async"
-    alt=""
-    loading="eager"
-    fetchpriority="high"
-    class="background__scene"
-  />
-  <img
-    src={cosmicJourney.src}
-    width={cosmicJourney.width}
-    height={cosmicJourney.height}
-    decoding="async"
-    alt=""
-    loading="lazy"
-    class="background__arrival"
-  />
+  <Picture src={cosmicJourney} formats={['avif', 'webp']} {widths} {sizes} quality={85} alt="" decoding="async" {pictureAttributes}
+    loading="eager" fetchpriority="high" class="background__scene" />
+  <Picture src={cosmicJourney} formats={['avif', 'webp']} {widths} {sizes} quality={85} alt="" decoding="async" {pictureAttributes}
+    loading="lazy" class="background__arrival" />
 </div>
 
 <style>
