@@ -62,7 +62,8 @@ const range = (n: number) => String(n).padStart(3, '0');
 
   .page {
     position: relative;
-    padding: 4.0625rem 0 calc(var(--art-h) * 0.43);
+    /* Em telas estreitas a arte é baixa: garante respiro entre cartões e frase. */
+    padding: 4.0625rem 0 max(var(--art-h) * 0.43, var(--art-h) * 0.31 + 5rem);
   }
 
   .motto {
