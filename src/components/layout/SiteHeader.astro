@@ -14,7 +14,8 @@ const isCurrent = (item: (typeof nav)[number]) =>
   item.match ? path.startsWith(item.match) : path === item.href;
 ---
 
-<header class="relative z-40 border-b border-line">
+<!-- Sem animação na troca de página: o cabeçalho fica estável enquanto o conteúdo muda. -->
+<header class="relative z-40 border-b border-line" transition:name="site-header" transition:animate="none">
   <div class="site-container grid h-header grid-cols-[1fr_auto_1fr] items-center gap-6 max-md:flex max-md:justify-between">
     <a href="/" class="group flex items-center gap-[2.1rem] justify-self-start text-paper" aria-label={`${site.name}, página inicial`}>
       <Spark size={14} class="transition-transform duration-500 ease-glitch group-hover:rotate-45" />
@@ -82,22 +83,32 @@ const isCurrent = (item: (typeof nav)[number]) =>
 </header>
 
 <script>
-  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
-  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  // Com o ClientRouter o cabeçalho é trocado a cada navegação: religa os
+  // eventos em cada página e descarta os da anterior.
+  let controller: AbortController | undefined;
 
-  const setOpen = (open: boolean) => {
-    toggle?.setAttribute('aria-expanded', String(open));
-    menu?.classList.toggle('hidden', !open);
-  };
+  document.addEventListener('astro:page-load', () => {
+    controller?.abort();
+    controller = new AbortController();
+    const { signal } = controller;
 
-  toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
-  menu?.addEventListener('click', (event) => {
-    if ((event.target as HTMLElement).closest('a')) setOpen(false);
-  });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
-      setOpen(false);
-      toggle.focus();
-    }
+    const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    const menu = document.querySelector<HTMLElement>('[data-menu]');
+
+    const setOpen = (open: boolean) => {
+      toggle?.setAttribute('aria-expanded', String(open));
+      menu?.classList.toggle('hidden', !open);
+    };
+
+    toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'), { signal });
+    menu?.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) setOpen(false);
+    }, { signal });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    }, { signal });
   });
 </script>

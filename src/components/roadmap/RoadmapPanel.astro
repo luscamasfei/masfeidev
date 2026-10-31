@@ -177,52 +177,63 @@ const { id, number, title, status, details, style } = Astro.props;
 </style>
 
 <script>
-  const panels = new Map<string, HTMLElement>();
-  for (const panel of document.querySelectorAll<HTMLElement>('[data-roadmap-panel]')) {
-    panels.set(panel.dataset.roadmapPanel!, panel);
-  }
-  const triggers = [...document.querySelectorAll<HTMLButtonElement>('[data-roadmap-trigger]')];
-  let openId: string | null = null;
+  // Religado a cada navegação do ClientRouter; os eventos da página anterior
+  // são descartados pelo AbortController.
+  let controller: AbortController | undefined;
 
-  const close = (restoreFocus = false) => {
-    if (!openId) return;
-    const trigger = triggers.find((t) => t.dataset.roadmapTrigger === openId);
-    panels.get(openId)!.hidden = true;
-    trigger?.setAttribute('aria-expanded', 'false');
-    openId = null;
-    if (restoreFocus) trigger?.focus();
-  };
+  document.addEventListener('astro:page-load', () => {
+    controller?.abort();
+    controller = new AbortController();
+    const { signal } = controller;
 
-  const open = (id: string) => {
-    close();
-    const panel = panels.get(id);
-    if (!panel) return;
-    panel.hidden = false;
-    triggers.find((t) => t.dataset.roadmapTrigger === id)?.setAttribute('aria-expanded', 'true');
-    openId = id;
-    panel.querySelector<HTMLElement>('[data-roadmap-close]')?.focus({ preventScroll: true });
-  };
+    const panels = new Map<string, HTMLElement>();
+    for (const panel of document.querySelectorAll<HTMLElement>('[data-roadmap-panel]')) {
+      panels.set(panel.dataset.roadmapPanel!, panel);
+    }
+    const triggers = [...document.querySelectorAll<HTMLButtonElement>('[data-roadmap-trigger]')];
+    if (triggers.length === 0) return;
+    let openId: string | null = null;
 
-  for (const trigger of triggers) {
-    trigger.addEventListener('click', () => {
-      const id = trigger.dataset.roadmapTrigger!;
-      if (openId === id) close();
-      else open(id);
-    });
-  }
+    const close = (restoreFocus = false) => {
+      if (!openId) return;
+      const trigger = triggers.find((t) => t.dataset.roadmapTrigger === openId);
+      panels.get(openId)!.hidden = true;
+      trigger?.setAttribute('aria-expanded', 'false');
+      openId = null;
+      if (restoreFocus) trigger?.focus();
+    };
 
-  for (const button of document.querySelectorAll('[data-roadmap-close]')) {
-    button.addEventListener('click', () => close(true));
-  }
+    const open = (id: string) => {
+      close();
+      const panel = panels.get(id);
+      if (!panel) return;
+      panel.hidden = false;
+      triggers.find((t) => t.dataset.roadmapTrigger === id)?.setAttribute('aria-expanded', 'true');
+      openId = id;
+      panel.querySelector<HTMLElement>('[data-roadmap-close]')?.focus({ preventScroll: true });
+    };
 
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && openId) close(true);
-  });
+    for (const trigger of triggers) {
+      trigger.addEventListener('click', () => {
+        const id = trigger.dataset.roadmapTrigger!;
+        if (openId === id) close();
+        else open(id);
+      }, { signal });
+    }
 
-  document.addEventListener('click', (event) => {
-    if (!openId) return;
-    const target = event.target as Node;
-    const trigger = triggers.find((t) => t.dataset.roadmapTrigger === openId);
-    if (!panels.get(openId)!.contains(target) && !trigger?.contains(target)) close();
+    for (const button of document.querySelectorAll('[data-roadmap-close]')) {
+      button.addEventListener('click', () => close(true), { signal });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && openId) close(true);
+    }, { signal });
+
+    document.addEventListener('click', (event) => {
+      if (!openId) return;
+      const target = event.target as Node;
+      const trigger = triggers.find((t) => t.dataset.roadmapTrigger === openId);
+      if (!panels.get(openId)!.contains(target) && !trigger?.contains(target)) close();
+    }, { signal });
   });
 </script>

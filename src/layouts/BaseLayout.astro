@@ -5,8 +5,10 @@ import '@fontsource/ibm-plex-mono/latin-400.css';
 import '@fontsource/ibm-plex-mono/latin-500.css';
 import '@/styles/global.css';
 
+import { ClientRouter } from 'astro:transitions';
 import SiteHeader from '@/components/layout/SiteHeader.astro';
 import { site } from '@/data/site';
+import { glitchPage } from '@/lib/transitions';
 
 interface Props {
   title?: string;
@@ -52,6 +54,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       </>
     )}
     <title>{pageTitle}</title>
+    <ClientRouter />
   </head>
   <body>
     <a
@@ -61,9 +64,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       Pular para o conteúdo
     </a>
     <SiteHeader index={headerIndex} />
-    <main id="conteudo">
+    <main id="conteudo" transition:name="page" transition:animate={glitchPage}>
       <slot />
     </main>
-    <div class="grain" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true" transition:persist></div>
   </body>
 </html>

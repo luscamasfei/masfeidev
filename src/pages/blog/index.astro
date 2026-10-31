@@ -13,7 +13,7 @@ const posts = await getPosts();
   <section class="site-container blog" aria-labelledby="page-title">
     <PageHeader eyebrow="Logs" title="Logs" description={logsIntro.description} index={String(posts.length).padStart(2, '0')}>
       <TagNav tags={getTags(posts)} />
-      <a href="/rss.xml" class="blog__rss">RSS</a>
+      <a href="/rss.xml" class="blog__rss" data-astro-reload>RSS</a>
     </PageHeader>
     <PostList posts={posts} />
   </section>
