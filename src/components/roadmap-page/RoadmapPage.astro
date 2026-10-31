@@ -1,0 +1,50 @@
+---
+import RoadmapHero from './RoadmapHero.astro';
+import RoadmapTrack from './RoadmapTrack.astro';
+import { roadmapPage } from '@/data/roadmap';
+---
+
+<section class="roadmap-page" aria-labelledby="roadmap-page-title">
+  <div class="page-frame">
+    <div class="page-top">
+      <RoadmapHero />
+      <aside class="side" aria-label="Direção da jornada">
+        <blockquote>“{roadmapPage.quote[0]}<br />{roadmapPage.quote[1]}”</blockquote>
+        <ul aria-label="Princípios da jornada">
+          {roadmapPage.verbs.map((verb) => <li>{verb}</li>)}
+          <li aria-hidden="true">//</li>
+        </ul>
+      </aside>
+    </div>
+    <RoadmapTrack />
+    <div class="notes">
+      {roadmapPage.notes.map((lines) => (
+        <aside class="note">{lines.map((line) => <p>{line}</p>)}</aside>
+      ))}
+    </div>
+    <p class="section-index page-index" aria-hidden="true">[ 02 ]</p>
+  </div>
+</section>
+
+<style>
+  .roadmap-page { position: relative; min-height: calc(100svh - var(--spacing-header)); }
+  .page-frame { width: min(100% - 2.5rem, 93.75rem); margin-inline: auto; padding-block: 2.5rem; }
+  .page-top { display: flex; justify-content: space-between; gap: 3rem; padding-inline: 2.5rem; }
+  .side { padding-top: 0.5rem; font-size: 0.6875rem; line-height: 1.6; text-transform: uppercase; }
+  blockquote { text-align: right; }
+  .side ul { margin-top: 4rem; padding-left: 1rem; border-left: 1px solid var(--color-line-strong); color: var(--color-ash); }
+  .page-top + :global(.track) { margin-top: 2.5rem; }
+  .notes { display: flex; justify-content: space-between; gap: 2rem; margin-top: 4rem; }
+  .note { padding: 1.25rem; border: 1px solid var(--color-line-strong); font-size: 0.65625rem; line-height: 1.5; text-transform: uppercase; }
+  .page-index { margin-top: 1.5rem; text-align: right; }
+  @media (max-width: 1023px) {
+    .page-top { padding-inline: 0; }
+    .notes { margin-top: 2rem; }
+  }
+  @media (max-width: 639px) {
+    .page-top { flex-direction: column; gap: 1.5rem; }
+    .side ul { display: none; }
+    blockquote { text-align: left; }
+    .notes { flex-direction: column; }
+  }
+</style>

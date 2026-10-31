@@ -11,11 +11,12 @@ import { site } from '@/data/site';
 interface Props {
   title?: string;
   description?: string;
+  headerIndex?: string;
   /** Artigos ganham metadados próprios para compartilhamento. */
   article?: { published: Date; modified?: Date; tags: string[] };
 }
 
-const { title, description = site.description, article } = Astro.props;
+const { title, description = site.description, article, headerIndex = '01' } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.title;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -54,7 +55,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     >
       Pular para o conteúdo
     </a>
-    <SiteHeader />
+    <SiteHeader index={headerIndex} />
     <main id="conteudo">
       <slot />
     </main>

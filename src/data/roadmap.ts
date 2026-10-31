@@ -88,3 +88,58 @@ export const roadmapConnections: RoadmapConnection[] = [
   { from: 'fase-03', to: 'fase-04', bend: 2 },
   { from: 'fase-04', to: 'fase-05', bend: 16 },
 ];
+
+
+/** Visualização expandida; não altera o conteúdo nem as posições do mini-roadmap. */
+export interface RoadmapPageStage {
+  id: string;
+  number: string;
+  title: string;
+  status: RoadmapStatus;
+  icon: RoadmapIcon | 'briefcase';
+  summary: string;
+  active: boolean;
+  /** Centro do nó na referência de 1672 × 941 px. */
+  position: { x: number; y: number };
+}
+
+export const roadmapPage = {
+  title: 'Roadmap',
+  subtitle: 'Meu caminho como desenvolvedor',
+  description:
+    'Este roadmap representa a minha evolução como desenvolvedor. Aqui organizo meus estudos, projetos e objetivos de forma visual, para manter o foco e acompanhar o progresso em direção aos meus objetivos na área de tecnologia.',
+  quote: ['Disciplina hoje,', 'liberdade amanhã.'],
+  verbs: ['Planejar', 'Estudar', 'Construir', 'Evoluir'],
+  notes: [
+    ['Mesmos lugares.', 'Pessoas diferentes.', 'Novos objetivos.'],
+    ['Um passo de cada vez', 'também é progresso.'],
+  ],
+} as const;
+
+export const roadmapPageStages: RoadmapPageStage[] = [
+  {
+    id: 'java', number: '01', title: 'Java', status: 'in-progress', icon: 'java', active: true,
+    summary: 'Aprendendo os fundamentos do Java e desenvolvendo habilidades de programação sólida e orientada a objetos.',
+    position: { x: 188, y: 411 },
+  },
+  {
+    id: 'fundamentos', number: '02', title: 'Fundamentos', status: 'building', icon: 'code', active: false,
+    summary: 'Aprofundando os conceitos de ciência da computação, estruturas de dados, lógica e boas práticas.',
+    position: { x: 483, y: 438 },
+  },
+  {
+    id: 'banco-de-dados', number: '03', title: 'Banco de Dados', status: 'building', icon: 'database', active: false,
+    summary: 'Estudando modelagem de dados, SQL e bancos como PostgreSQL, aprendendo a projetar soluções reais.',
+    position: { x: 820, y: 445 },
+  },
+  {
+    id: 'projetos', number: '04', title: 'Projetos', status: 'building', icon: 'cube', active: false,
+    summary: 'Desenvolvendo projetos práticos para aplicar os conhecimentos e construir um portfólio consistente.',
+    position: { x: 1117, y: 491 },
+  },
+  {
+    id: 'carreira', number: '05', title: 'Carreira', status: 'building', icon: 'briefcase', active: false,
+    summary: 'Conquistando minha primeira oportunidade na área de TI e evoluindo continuamente na minha carreira.',
+    position: { x: 1467, y: 456 },
+  },
+];

@@ -1,0 +1,50 @@
+---
+import { roadmapPageStages, roadmapStatusLabel } from '@/data/roadmap';
+---
+
+<div class="track">
+  <h2 class="sr-only">Etapas da jornada</h2>
+  <ol aria-label="Etapas da jornada" class="stages">
+    {roadmapPageStages.map((stage) => (
+      <li id={`etapa-${stage.id}`} class:list={['stage', { 'stage--active': stage.active }]}
+        style={`--node-x: ${stage.position.x / 1672 * 100}%; --node-y: ${(stage.position.y - 411) / 16}rem;`}
+        aria-current={stage.active ? 'step' : undefined}>
+        <span class="number" aria-hidden="true">{stage.number}</span>
+        <h3>{stage.title}</h3>
+        <p class="status">{roadmapStatusLabel[stage.status]}</p>
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  /* Base estrutural: trilha, ícones e cards entram nas etapas seguintes. */
+  .track { position: relative; min-height: 19rem; }
+  .stages { position: relative; min-height: inherit; }
+  .stage {
+    position: absolute;
+    top: var(--node-y);
+    left: var(--node-x);
+    width: 13rem;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .number {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-inline: auto;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    color: var(--color-ash);
+  }
+  .stage--active .number { border-color: var(--color-paper); color: var(--color-paper); }
+  h3 { margin-top: 0.65rem; font-size: 0.875rem; font-weight: 500; }
+  .status { margin-top: 0.3rem; font-size: 0.65625rem; color: var(--color-ash); text-transform: uppercase; }
+  @media (max-width: 1023px) {
+    .stages { display: grid; gap: 2rem; padding-block: 1rem; }
+    .stage { position: relative; top: auto; left: auto; width: auto; transform: none; }
+  }
+</style>

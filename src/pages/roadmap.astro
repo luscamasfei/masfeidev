@@ -1,0 +1,9 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import RoadmapPage from '@/components/roadmap-page/RoadmapPage.astro';
+import { roadmapPage } from '@/data/roadmap';
+---
+
+<BaseLayout title={roadmapPage.title} description={roadmapPage.description} headerIndex="02">
+  <RoadmapPage />
+</BaseLayout>

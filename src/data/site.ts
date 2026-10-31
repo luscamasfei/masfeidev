@@ -16,7 +16,7 @@ export interface NavItem {
 
 export const nav: NavItem[] = [
   { label: 'Início', href: '/' },
-  { label: 'Roadmap', href: '/#roadmap' },
+  { label: 'Roadmap', href: '/roadmap/', match: '/roadmap' },
   { label: 'Projetos', href: '/projetos/', match: '/projetos' },
   { label: 'Blog', href: '/blog/', match: '/blog' },
   { label: 'Sobre', href: '/sobre/', match: '/sobre' },
