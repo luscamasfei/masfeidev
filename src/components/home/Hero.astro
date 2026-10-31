@@ -128,9 +128,15 @@ import { hero } from '@/data/home';
   }
 
   .hero__name-wrap :global(.hero__name) {
-    /* Preserve the title's height and the position of the following copy. */
-    width: calc(9.125rem * 315 / 157);
-    height: 9.125rem;
+    /*
+     * One unit per pixel of the 325 × 152 GIF, at the scale of the previous
+     * 157 px-tall art: the letters keep their size and position. The box
+     * keeps the old height and the margin absorbs the 5 px offset to the left.
+     */
+    --px: calc(9.125rem / 157);
+    width: calc(var(--px) * 325);
+    height: calc(var(--px) * 157);
+    margin-left: calc(var(--px) * -5);
   }
 
   .hero__subtitle {
@@ -318,8 +324,7 @@ import { hero } from '@/data/home';
 
   @media (max-width: 479px) {
     .hero__name-wrap :global(.hero__name) {
-      width: calc(7rem * 315 / 157);
-      height: 7rem;
+      --px: calc(7rem / 157);
     }
 
     .hero__subtitle {
