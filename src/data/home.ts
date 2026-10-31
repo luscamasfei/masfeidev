@@ -17,7 +17,7 @@ export const projectsIntro = {
 } as const;
 
 export const logsIntro = {
-  eyebrow: 'Logs',
-  title: 'Últimos Logs',
+  eyebrow: 'Blog',
+  title: 'Blog',
   description: 'Pensamentos, aprendizados e registros da minha jornada.',
 } as const;

@@ -11,7 +11,7 @@ const posts = await getPosts();
 
 <BaseLayout title="Logs" description={logsIntro.description}>
   <section class="site-container blog" aria-labelledby="page-title">
-    <PageHeader eyebrow={logsIntro.eyebrow} title="Logs" description={logsIntro.description} index={String(posts.length).padStart(2, '0')}>
+    <PageHeader eyebrow="Logs" title="Logs" description={logsIntro.description} index={String(posts.length).padStart(2, '0')}>
       <TagNav tags={getTags(posts)} />
       <a href="/rss.xml" class="blog__rss">RSS</a>
     </PageHeader>
