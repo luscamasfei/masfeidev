@@ -1,8 +1,40 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import StagePlaceholder from '@/components/ui/StagePlaceholder.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import PostList from '@/components/blog/PostList.astro';
+import TagNav from '@/components/blog/TagNav.astro';
+import { getPosts, getTags } from '@/lib/blog';
+import { logsIntro } from '@/data/home';
+
+const posts = await getPosts();
 ---
 
-<BaseLayout title="Blog">
-  <StagePlaceholder label="Logs" title="Últimos Logs" stage="a Etapa 5" />
+<BaseLayout title="Logs" description={logsIntro.description}>
+  <section class="site-container blog" aria-labelledby="page-title">
+    <PageHeader eyebrow={logsIntro.eyebrow} title="Logs" description={logsIntro.description} index={String(posts.length).padStart(2, '0')}>
+      <TagNav tags={getTags(posts)} />
+      <a href="/rss.xml" class="blog__rss">RSS</a>
+    </PageHeader>
+    <PostList posts={posts} />
+  </section>
 </BaseLayout>
+
+<style>
+  .blog {
+    padding: 3.5rem 0 6rem;
+  }
+
+  .blog__rss {
+    position: absolute;
+    right: 0;
+    bottom: 2.5rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    color: var(--color-smoke);
+    transition: color 0.2s;
+  }
+
+  .blog__rss:hover {
+    color: var(--color-paper);
+  }
+</style>

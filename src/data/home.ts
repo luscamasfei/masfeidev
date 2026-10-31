@@ -15,3 +15,9 @@ export const projectsIntro = {
   title: 'Projetos',
   description: 'Alguns projetos que venho desenvolvendo e que colocam em prática o que estou aprendendo.',
 } as const;
+
+export const logsIntro = {
+  eyebrow: 'Logs',
+  title: 'Últimos Logs',
+  description: 'Pensamentos, aprendizados e registros da minha jornada.',
+} as const;

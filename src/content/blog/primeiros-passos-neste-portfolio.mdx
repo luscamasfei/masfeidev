@@ -1,0 +1,34 @@
+---
+title: Primeiros passos neste portfólio
+summary: Como este site foi construído, da imagem de referência ao roadmap e aos projetos.
+date: 2026-10-31
+tags: [Projetos pessoais, Astro]
+draft: true
+---
+
+{/* Rascunho com fatos do desenvolvimento. Revise o texto e troque `draft` para `false` para publicar. */}
+
+Este site começou com uma imagem: um mockup preto e branco, com granulação, um título com glitch e um mapa de fases. A regra foi tratar essa imagem como especificação e reproduzi-la com o máximo de fidelidade.
+
+## A stack
+
+O portfólio é gerado de forma estática com **Astro**, escrito em **TypeScript** e estilizado com **Tailwind CSS**. Os projetos e estes logs são arquivos Markdown e MDX organizados em Content Collections, então publicar algo novo é criar um arquivo.
+
+## Desenvolvimento em etapas
+
+O trabalho foi dividido em etapas, cada uma com o seu commit: fundação, hero, roadmap, projetos e blog. Ao fim de cada uma, o site era comparado com a referência por meio de capturas de tela na mesma resolução.
+
+## O roadmap
+
+O mapa da seção Roadmap lê os dados de um arquivo de configuração. Cada fase é um nó, e as conexões entre eles aceitam ramificações:
+
+```ts
+export const roadmapConnections: RoadmapConnection[] = [
+  { from: 'java', to: 'fase-02', bend: -34 },
+  { from: 'fase-02', to: 'fase-03', bend: 4 },
+];
+```
+
+## O que vem pela frente
+
+{/* Escreva aqui os próximos passos que você quer registrar. */}

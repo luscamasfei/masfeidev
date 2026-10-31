@@ -1,0 +1,39 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import PostList from '@/components/blog/PostList.astro';
+import TagNav from '@/components/blog/TagNav.astro';
+import { getPosts, getTags, tagSlug, type Post } from '@/lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return getTags(posts).map(({ name }) => ({
+    params: { tag: tagSlug(name) },
+    props: { name, tags: getTags(posts), posts: posts.filter((post) => post.data.tags.includes(name)) },
+  }));
+}
+
+interface Props {
+  name: string;
+  tags: { name: string; count: number }[];
+  posts: Post[];
+}
+
+const { name, tags, posts } = Astro.props;
+const description = `Logs marcados com #${name}.`;
+---
+
+<BaseLayout title={`#${name} · Logs`} description={description}>
+  <section class="site-container tag-page" aria-labelledby="page-title">
+    <PageHeader eyebrow="Logs / Tag" title={`#${name}`} description={description} index={String(posts.length).padStart(2, '0')}>
+      <TagNav tags={tags} current={name} />
+    </PageHeader>
+    <PostList posts={posts} />
+  </section>
+</BaseLayout>
+
+<style>
+  .tag-page {
+    padding: 3.5rem 0 6rem;
+  }
+</style>

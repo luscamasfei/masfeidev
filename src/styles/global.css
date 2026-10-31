@@ -199,10 +199,61 @@
     margin-top: 0.4rem;
   }
 
+  & :is(h2, h3) {
+    scroll-margin-top: 1.5rem;
+  }
+
+  & blockquote {
+    padding-left: 1.25rem;
+    border-left: 1px solid var(--color-line-strong);
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.75rem;
+    color: var(--color-paper);
+  }
+
+  & img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--color-line);
+    filter: grayscale(1);
+  }
+
+  & hr {
+    border: 0;
+    border-top: 1px solid var(--color-line);
+    margin-block: 2.5rem;
+  }
+
+  & pre {
+    margin-block: 1.5rem;
+    padding: 1rem 1.15rem;
+    overflow-x: auto;
+    border: 1px solid var(--color-line);
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    tab-size: 2;
+  }
+
   & :not(pre) > code {
     padding: 0.05rem 0.3rem;
     border: 1px solid var(--color-line);
     font-size: 0.75rem;
     color: var(--color-paper);
   }
+}
+
+/* Monochrome palette for Shiki's css-variables theme. */
+:root {
+  --astro-code-foreground: #d4d4d4;
+  --astro-code-background: #090909;
+  --astro-code-token-keyword: #ffffff;
+  --astro-code-token-function: #e5e5e5;
+  --astro-code-token-constant: #bdbdbd;
+  --astro-code-token-parameter: #c8c8c8;
+  --astro-code-token-string: #9a9a9a;
+  --astro-code-token-string-expression: #9a9a9a;
+  --astro-code-token-comment: #5f5f5f;
+  --astro-code-token-punctuation: #8a8a8a;
+  --astro-code-token-link: #e5e5e5;
 }

@@ -1,0 +1,186 @@
+---
+import { logsIntro } from '@/data/home';
+import { getPosts, isoDate, postHref, shortDate } from '@/lib/blog';
+
+const posts = (await getPosts()).slice(0, 3);
+---
+
+<section id="logs" class="logs" aria-labelledby="logs-title">
+  <div class="site-container logs__frame">
+    <div class="logs__intro">
+      <p class="logs__eyebrow">// {logsIntro.eyebrow}</p>
+      <h2 id="logs-title" class="logs__title"><a href="/blog/">{logsIntro.title}</a></h2>
+      <p class="logs__description">{logsIntro.description}</p>
+    </div>
+
+    {posts.length > 0 ? (
+      <ul class="logs__list">
+        {posts.map((post) => (
+          <li class="log">
+            <time class="log__date" datetime={isoDate(post.data.date)}>{shortDate(post.data.date)}</time>
+            <h3 class="log__title"><a href={postHref(post)} class="log__link">{post.data.title}</a></h3>
+            <div class="log__row">
+              <p class="log__summary">{post.data.summary}</p>
+              <svg class="log__arrow" width="12" height="12" viewBox="0 0 13 13" aria-hidden="true">
+                <path d="M1.5 11.5 11 2M4 1.5h7.5V9" fill="none" stroke="currentColor" stroke-width="1.2" />
+              </svg>
+            </div>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="logs__empty">Nenhum log publicado ainda.</p>
+    )}
+
+    <p class="section-index logs__index" aria-hidden="true">[ 04 ]</p>
+  </div>
+</section>
+
+<style>
+  /* Reference at 1672 px: intro in the first 335 px, three 371 px log columns split by hairlines. */
+  .logs__frame {
+    position: relative;
+    display: grid;
+    grid-template-columns: 20.9375rem minmax(0, 1fr);
+    padding: 0.75rem 0 2.5rem;
+  }
+
+  .logs__eyebrow {
+    margin-left: 0.1rem;
+    font-size: 0.65625rem;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .logs__title {
+    margin-top: 0.35rem;
+    font-family: var(--font-serif);
+    font-size: 2.25rem;
+    font-weight: 400;
+    line-height: 2.5rem;
+    color: var(--color-paper);
+  }
+
+  .logs__title a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+  }
+
+  .logs__description {
+    margin-top: 0.05rem;
+    max-width: 18.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .logs__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 0.8rem;
+  }
+
+  .log {
+    position: relative;
+    padding: 0.2rem 1.25rem 0.5rem 0.9375rem;
+    border-left: 1px solid var(--color-line);
+  }
+
+  .log__date {
+    display: block;
+    font-size: 0.59375rem;
+    letter-spacing: 0.06em;
+    line-height: 1rem;
+    color: #8a8a8a;
+  }
+
+  .log__title {
+    margin-top: 0.3rem;
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    font-weight: 400;
+    line-height: 1.375rem;
+    color: var(--color-paper);
+  }
+
+  .log__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .log__row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.3rem;
+  }
+
+  .log__summary {
+    max-width: 18rem;
+    font-size: 0.65625rem;
+    line-height: 1rem;
+    color: var(--color-ash);
+  }
+
+  .log__arrow {
+    flex: none;
+    margin-bottom: 0.15rem;
+    color: var(--color-ash);
+    transition: color 0.25s, transform 0.3s var(--ease-glitch);
+  }
+
+  .log:hover .log__title {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--color-line-strong);
+    text-underline-offset: 4px;
+  }
+
+  .log:hover .log__arrow {
+    color: var(--color-paper);
+    transform: translate(2px, -2px);
+  }
+
+  .logs__empty {
+    align-self: center;
+    margin-top: 1.5rem;
+    padding: 1.5rem 0.9375rem;
+    border-left: 1px solid var(--color-line);
+    font-size: 0.65625rem;
+    letter-spacing: 0.03em;
+    color: #5c5c5c;
+  }
+
+  .logs__index {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+  }
+
+  @media (max-width: 1279px) {
+    .logs__frame {
+      grid-template-columns: 1fr;
+      padding: 2.5rem 0 3.5rem;
+    }
+
+    .logs__index {
+      top: 2.5rem;
+    }
+
+    .logs__list {
+      margin-top: 2rem;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .logs__list {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+  }
+</style>
