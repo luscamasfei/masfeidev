@@ -68,16 +68,26 @@ Cada post é um arquivo `.md` ou `.mdx` em `src/content/blog/`, com `title`, `su
 
 ## Roadmap
 
-O roadmap aparece em dois lugares, com os mesmos dados em `src/data/roadmap.ts`:
+As fases ficam numa lista única em `src/data/roadmap.ts` (`roadmapNodes`), na ordem da estrada. A home e a página `/roadmap` leem a mesma lista, e cada uma calcula a geometria da própria estrada pela quantidade de fases. Para acrescentar uma fase, basta incluí-la na lista, sem mexer nos componentes.
 
-- **Página inicial** (`src/components/roadmap/Roadmap.astro`): mini-roadmap com as cinco primeiras fases.
-- **Página `/roadmap`** (`src/components/roadmap-page/`): a mesma estrada ampliada em serpentina, com 20 fases em quatro fileiras. Abaixo de 1024 px, ela segue em três colunas.
-
-Para editar o roadmap:
-
-- **Fases da home:** são definidas em `roadmapNodes`. Uma fase com `details` vira um botão que abre o painel de detalhes (`src/components/roadmap/RoadmapPanel.astro`), compartilhado pelas duas páginas.
-- **Fases da página `/roadmap`:** são as fases da home, seguidas de fases ainda não definidas, que aparecem com cadeado e o estado "em construção". A quantidade e a posição dos nós vêm de `roadmapPagePositions`, em pixels de uma referência de 1672 × 941. A curvatura de cada trecho fica em `BENDS`, em `RoadmapTrack.astro`.
+- **Fases:** Java está em andamento. As fases 02 a 05 têm ícone, e as 06 a 20 são marcadores ainda não definidos, com cadeado e o estado "em construção". Uma fase com `details` vira um botão que abre o painel de detalhes (`src/components/roadmap/RoadmapPanel.astro`), compartilhado pelas duas páginas.
+- **Página inicial** (`src/components/roadmap/Roadmap.astro`):
+  - **Estrada:** horizontal e contínua. Começa mostrando as cinco primeiras fases e segue para a direita. A altura e a curva de cada trecho seguem um ciclo de dez, definido em `WAVE_Y` e `WAVE_BEND`.
+  - **Navegação:** pelo mouse (arrastando), pelo toque, pelas setas e pelas teclas Home e End do teclado, ou pelos dois botões ‹ ›. As bordas esmaecem enquanto houver estrada escondida daquele lado.
+  - **Arraste e painel:** um arraste não abre fases. O painel acompanha o nó enquanto a estrada rola.
+- **Página `/roadmap`** (`src/components/roadmap-page/`):
+  - **Estrada:** ampliada em serpentina, em fileiras de cinco. As quatro primeiras fileiras têm posições ajustadas à arte, em `roadmapPagePositions`. Se a lista passar de 20 fases, novas fileiras são criadas automaticamente.
+  - **Telas menores:** abaixo de 1024 px, a estrada segue em três colunas.
 - **Títulos animados:** "Lucas Maffei" e "Roadmap" são GIFs em `public/images/`, com um quadro estático (`.png`) exibido quando o sistema pede movimento reduzido.
+
+## Transições entre páginas
+
+A navegação usa o `ClientRouter` do Astro (`astro:transitions`). Só o conteúdo anima: o cabeçalho fica parado e o grão do fundo continua de uma página para a outra.
+
+- **Efeito:** a página atual sai em cerca de 110 ms, com faixas de interferência e um leve deslize horizontal. A nova entra com um fade curto. A animação fica em `src/lib/transitions.ts`, e os quadros-chave em `src/styles/global.css`.
+- **Movimento reduzido:** com `prefers-reduced-motion`, a troca vira um fade simples, sem deslize.
+- **Scripts:** como a página não recarrega, os scripts interativos se religam no evento `astro:page-load` e descartam os eventos da página anterior com um `AbortController`. Componentes novos com script devem seguir o mesmo padrão.
+- **Links que não são páginas:** links para arquivos, como o RSS, levam `data-astro-reload` para abrir com recarga completa.
 
 ## Identidade visual
 
