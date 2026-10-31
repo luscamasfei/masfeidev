@@ -16,6 +16,7 @@ team:
     github: https://github.com/maria-eduarda-cdv
   - name: Luan Schultz Ceretta
     github: https://github.com/SupDan01
+pending: [Decisões técnicas, Aprendizados, Capturas de tela]
 ---
 
 ## Objetivo

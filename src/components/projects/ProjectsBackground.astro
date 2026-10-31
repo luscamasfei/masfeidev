@@ -1,0 +1,57 @@
+---
+import { Picture } from 'astro:assets';
+import spaceBridge from '@/assets/projects/space-bridge.png';
+---
+
+<!--
+  Cenário da página /projetos: horizonte planetário e ponte espacial, preso ao
+  pé da página. Nunca passa do tamanho original (1672 px): em telas maiores as
+  laterais se dissolvem no preto em vez de ampliar a arte.
+-->
+<div class="scene" aria-hidden="true">
+  <Picture
+    src={spaceBridge}
+    formats={['avif', 'webp']}
+    widths={[828, 1254, 1672]}
+    sizes="(min-width: 768px) min(100vw, 1672px), 860px"
+    quality={85}
+    alt=""
+    loading="eager"
+    decoding="async"
+    class="scene__art"
+  />
+</div>
+
+<style>
+  .scene {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .scene :global(.scene__art) {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: min(100%, 104.5rem);
+    height: auto;
+    translate: -50% 0;
+    /* O céu de cima some no preto; a borda inferior também, para não haver corte reto. */
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, rgb(0 0 0 / 0.15) 22%, rgb(0 0 0 / 0.55) 38%, #000 52%, #000 94%, transparent 100%),
+      linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+    mask-composite: intersect;
+  }
+
+  /* Telas estreitas: a arte é ampliada e centrada entre o horizonte e a ponte. */
+  @media (max-width: 767px) {
+    .scene :global(.scene__art) {
+      width: 53.75rem;
+      max-width: none;
+      left: 46%;
+      mask-image: linear-gradient(to bottom, transparent 0%, rgb(0 0 0 / 0.4) 30%, #000 50%, #000 94%, transparent 100%);
+    }
+  }
+</style>

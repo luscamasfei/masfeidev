@@ -48,9 +48,12 @@ public/
 Cada projeto é um arquivo Markdown em `src/content/projetos/`. Os campos do cabeçalho estão definidos em `src/content.config.ts`:
 
 - **Obrigatórios:** `title`, `summary`, `order`, `status`, `context`, `technologies` e `art`.
-- **Opcionais:** `repository`, `demo` e `team`.
+- **Opcionais:** `repository`, `demo`, `team` e `pending`.
 
 O texto abaixo do cabeçalho vira a página do projeto. A página inicial mostra os três primeiros pela ordem de `order`.
+
+- **Página `/projetos`:** arquivo em três colunas de cartões, sempre encerrado pelo cartão "Próximo projeto". Os textos fixos da página ficam em `src/data/projects.ts`. O cenário da ponte espacial (`src/assets/projects/space-bridge.png`) fica preso ao pé da página e desce junto quando há mais projetos.
+- **Página de cada projeto:** é um estudo de caso. O sumário lateral é gerado a partir dos títulos `##` do texto. Seções ainda não escritas entram em `pending` (por exemplo, `pending: [Aprendizados]`) e aparecem como "em documentação". Quando a seção for escrita, basta tirá-la da lista.
 
 ### Blog
 
@@ -78,7 +81,7 @@ As fases ficam numa lista única em `src/data/roadmap.ts` (`roadmapNodes`), na o
 - **Página `/roadmap`** (`src/components/roadmap-page/`):
   - **Estrada:** ampliada em serpentina, em fileiras de cinco. As quatro primeiras fileiras têm posições ajustadas à arte, em `roadmapPagePositions`. Se a lista passar de 20 fases, novas fileiras são criadas automaticamente.
   - **Telas menores:** abaixo de 1024 px, a estrada segue em três colunas.
-- **Títulos animados:** "Lucas Maffei" e "Roadmap" são GIFs em `public/images/`, com um quadro estático (`.png`) exibido quando o sistema pede movimento reduzido.
+- **Títulos animados:** "Lucas Maffei", "Roadmap" e "Projetos" são GIFs em `public/images/`, com um quadro estático (`.png`) exibido quando o sistema pede movimento reduzido. Os títulos de página usam o componente `src/components/ui/GlitchWordmark.astro`.
 
 ## Transições entre páginas
 

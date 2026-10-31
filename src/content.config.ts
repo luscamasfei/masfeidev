@@ -17,6 +17,8 @@ const projetos = defineCollection({
     /** Ilustração monocromática do cartão. */
     art: z.enum(['horizon', 'corridor']),
     team: z.array(z.object({ name: z.string(), github: z.url().optional() })).default([]),
+    /** Seções do estudo de caso ainda sem conteúdo; aparecem como "em documentação". */
+    pending: z.array(z.string()).default([]),
   }),
 });
 
