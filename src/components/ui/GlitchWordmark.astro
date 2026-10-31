@@ -1,0 +1,59 @@
+---
+/**
+ * Título de página em GIF glitch fornecido pelo autor ("Roadmap", "Projetos").
+ * O GIF tem fundo preto, removido por mix-blend-mode, e um quadro estático
+ * para movimento reduzido. A arte aparece no tamanho nativo; `inset` é a
+ * coluna, em pixels do arquivo, onde começa a primeira letra: o recuo a
+ * alinha à coluna de texto e deixa os rastros vazarem para a margem.
+ */
+interface Props {
+  text: string;
+  /** Caminho sem extensão em /public: usa `.gif` animado e `.png` estático. */
+  src: string;
+  width: number;
+  height: number;
+  inset: number;
+}
+
+const { text, src, width, height, inset } = Astro.props;
+---
+
+<span class="sr-only">{text}</span>
+<picture class="wordmark" style={`--w-native: ${width / 16}rem; --inset: ${inset / width}`}>
+  <source media="(prefers-reduced-motion: reduce)" srcset={`${src}.png`} />
+  <img
+    src={`${src}.gif`}
+    width={width}
+    height={height}
+    alt=""
+    aria-hidden="true"
+    draggable="false"
+    loading="eager"
+    decoding="async"
+    fetchpriority="high"
+  />
+</picture>
+
+<style>
+  .wordmark {
+    --w: min(var(--w-native), 100vw - 1rem);
+    display: block;
+    width: var(--w);
+    margin-left: calc(var(--w) * var(--inset) * -1);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    filter: contrast(1.2);
+    mix-blend-mode: screen;
+    mask-image:
+      linear-gradient(to right, transparent, #000 3%, #000 97%, transparent),
+      linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+    mask-composite: intersect;
+    user-select: none;
+    pointer-events: none;
+  }
+</style>

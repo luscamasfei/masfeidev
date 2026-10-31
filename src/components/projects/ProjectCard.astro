@@ -2,33 +2,64 @@
 import ProjectArt from '@/components/projects/ProjectArt.astro';
 import { projectHref, projectNumber, type Project } from '@/lib/projects';
 
-interface Props {
-  project: Project;
-  index: number;
-  headingLevel?: 'h2' | 'h3';
+interface Upcoming {
+  title: string;
+  status: string;
+  description: string;
+  tag: string;
 }
 
-const { project, index, headingLevel: Heading = 'h3' } = Astro.props;
-const { title, summary, technologies, art } = project.data;
+/**
+ * Cartão de projeto. `compact` é o da seção da home; `archive` é o da página
+ * /projetos, maior e com respiro da referência. Sem `project`, mostra o
+ * cartão reservado ao próximo projeto (`upcoming`), sem link.
+ */
+type Props = {
+  index: number;
+  headingLevel?: 'h2' | 'h3';
+  layout?: 'compact' | 'archive';
+} & ({ project: Project; upcoming?: never } | { project?: never; upcoming: Upcoming });
+
+const { project, upcoming, index, headingLevel: Heading = 'h3', layout = 'compact' } = Astro.props;
 ---
 
-<article class="card">
+<article class:list={['card', `card--${layout}`, { 'card--upcoming': upcoming }]}>
   <p class="card__index" aria-hidden="true">// {projectNumber(index)}</p>
   <div class="card__art">
-    <ProjectArt variant={art} class="card__svg" />
+    <ProjectArt variant={project ? project.data.art : 'orbit'} class="card__svg" />
   </div>
-  <Heading class="card__title">
-    <a href={projectHref(project)} class="card__link">{title}</a>
-  </Heading>
-  <div class="card__row">
-    <p class="card__summary">{summary}</p>
-    <svg class="card__arrow" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
-      <path d="M1.5 11.5 11 2M4 1.5h7.5V9" fill="none" stroke="currentColor" stroke-width="1.2" />
-    </svg>
-  </div>
-  <ul class="card__tags" aria-label="Tecnologias">
-    {technologies.map((tech) => <li>{tech}</li>)}
-  </ul>
+  {project ? (
+    <>
+      <Heading class="card__title">
+        <a href={projectHref(project)} class="card__link">{project.data.title}</a>
+      </Heading>
+      <div class="card__row">
+        <p class="card__summary">{project.data.summary}</p>
+        <svg class="card__arrow" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+          <path d="M1.5 11.5 11 2M4 1.5h7.5V9" fill="none" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </div>
+      <ul class="card__tags" aria-label="Tecnologias">
+        {project.data.technologies.map((tech) => <li>{tech}</li>)}
+      </ul>
+    </>
+  ) : upcoming && (
+    <>
+      <div class="card__row">
+        <div>
+          <Heading class="card__title">{upcoming.title}</Heading>
+          <p class="card__status">{upcoming.status}</p>
+        </div>
+        <svg class="card__arrow" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+          <path d="M1.5 11.5 11 2M4 1.5h7.5V9" fill="none" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </div>
+      <p class="card__summary">{upcoming.description}</p>
+      <ul class="card__tags" aria-label="Situação">
+        <li>{upcoming.tag}</li>
+      </ul>
+    </>
+  )}
 </article>
 
 <style>
@@ -135,5 +166,85 @@ const { title, summary, technologies, art } = project.data;
     font-size: 0.59375rem;
     line-height: 0.95rem;
     color: var(--color-paper);
+  }
+
+  /*
+   * Arquivo de projetos (página /projetos), medido na referência: cartões de
+   * 340 px, arte de 70 px de altura, título de 13 px e etiquetas de 18 px.
+   */
+  .card--archive {
+    padding: 0.4375rem 0.75rem 0.875rem;
+    border-color: rgb(255 255 255 / 0.24);
+  }
+
+  .card--archive .card__index {
+    font-size: 0.625rem;
+    line-height: 0.625rem;
+  }
+
+  .card--archive .card__art {
+    height: 4.375rem;
+    margin-top: 0.125rem;
+    aspect-ratio: auto;
+  }
+
+  .card--archive .card__title {
+    margin-top: 0.6875rem;
+    font-size: 0.8125rem;
+    line-height: 1.125rem;
+  }
+
+  .card--archive .card__row {
+    align-items: center;
+    margin-top: 0.1875rem;
+  }
+
+  .card--archive .card__summary {
+    max-width: 17.5rem;
+    font-size: 0.6875rem;
+    line-height: 1rem;
+  }
+
+  .card--archive .card__arrow {
+    width: 0.875rem;
+    height: 0.875rem;
+    margin: 0 0.25rem 0 0;
+  }
+
+  .card--archive .card__tags {
+    gap: 0.625rem 0.5625rem;
+    margin-top: 0.6875rem;
+  }
+
+  .card--archive .card__tags li {
+    padding: 0 0.625rem;
+    font-size: 0.65625rem;
+    line-height: 1.125rem;
+  }
+
+  .card--upcoming .card__title {
+    margin-top: 0;
+  }
+
+  .card--upcoming > .card__row {
+    margin-top: 0.875rem;
+  }
+
+  .card--upcoming .card__status {
+    margin-top: 0.125rem;
+    font-size: 0.65625rem;
+    letter-spacing: 0.06em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-ash);
+  }
+
+  .card--upcoming > .card__summary {
+    margin-top: 0.5rem;
+    max-width: 17rem;
+  }
+
+  .card--upcoming .card__arrow {
+    color: var(--color-ash);
   }
 </style>

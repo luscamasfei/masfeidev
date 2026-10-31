@@ -4,7 +4,7 @@
  * manter o grão e o contraste da referência sem depender de fotos.
  */
 interface Props {
-  variant: 'horizon' | 'corridor';
+  variant: 'horizon' | 'corridor' | 'orbit';
   class?: string;
 }
 
@@ -87,6 +87,23 @@ const vp = { x: 290, y: 54 };
       <path d={`M0 0 L${vp.x - 15} ${vp.y - 11} M580 0 L${vp.x + 15} ${vp.y - 11} M0 110 L${vp.x - 15} ${vp.y + 11} M580 110 L${vp.x + 15} ${vp.y + 11}`} stroke="#fff" stroke-opacity="0.35" stroke-width="0.8" />
       <path d={`M${vp.x - 15} ${vp.y + 11} L120 110 H460 L${vp.x + 15} ${vp.y + 11}Z`} fill={`url(#${id}-fade)`} opacity="0.4" filter={`url(#${id}-rough)`} />
       <path d={`M${vp.x} ${vp.y + 11} V110`} stroke="#fff" stroke-opacity="0.3" stroke-width="2" />
+    </g>
+  )}
+
+  {variant === 'orbit' && (
+    <g>
+      <rect width="580" height="110" filter={`url(#${id}-stars)`} opacity="0.9" />
+      <circle cx="390" cy="122" r="118" fill="#070707" />
+      <circle cx="390" cy="122" r="118" fill={`url(#${id}-rim)`} opacity="0.3" filter={`url(#${id}-rough)`} />
+      <circle cx="390" cy="122" r="117.5" fill="none" stroke={`url(#${id}-rim)`} stroke-width="2" />
+      <path d="M0 84.5h580" stroke="#fff" stroke-opacity="0.45" stroke-width="0.7" stroke-dasharray="26 5 4 7 60 4" />
+      <g fill="#fff">
+        <rect x="118" y="52" width="74" height="1.2" opacity="0.55" />
+        <rect x="150" y="57" width="38" height="2" opacity="0.35" />
+        <rect x="96" y="61" width="52" height="1" opacity="0.4" />
+        <rect x="232" y="82" width="46" height="4" opacity="0.18" />
+        <rect x="470" y="80" width="30" height="2" opacity="0.4" />
+      </g>
     </g>
   )}
 
