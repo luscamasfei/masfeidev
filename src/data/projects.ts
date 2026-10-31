@@ -13,4 +13,5 @@ export const projectsPage = {
     description: 'Um novo projeto está em desenvolvimento. Em breve, mais detalhes por aqui.',
     tag: 'Em breve',
   },
+  motto: 'Explorar. Construir. Documentar.',
 } as const;

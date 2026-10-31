@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeader from '@/components/ui/PageHeader.astro';
 import GlitchWordmark from '@/components/ui/GlitchWordmark.astro';
 import ProjectCard from '@/components/projects/ProjectCard.astro';
+import ProjectsBackground from '@/components/projects/ProjectsBackground.astro';
 import { getProjects } from '@/lib/projects';
 import { projectsPage } from '@/data/projects';
 
@@ -13,7 +14,9 @@ const range = (n: number) => String(n).padStart(3, '0');
 ---
 
 <BaseLayout title={projectsPage.title} description={projectsPage.description}>
-  <section class="site-container page" aria-labelledby="page-title">
+  <section class="projects-page" aria-labelledby="page-title">
+    <ProjectsBackground />
+    <div class="site-container page">
     <PageHeader eyebrow={projectsPage.eyebrow} title={projectsPage.title} index={String(projects.length).padStart(2, '0')}>
       <GlitchWordmark slot="title" text={projectsPage.title} src="/images/projetos-glitch" width={368} height={84} inset={65} />
       <p class="intro">{projectsPage.description}</p>
@@ -32,6 +35,9 @@ const range = (n: number) => String(n).padStart(3, '0');
         <li><ProjectCard upcoming={projectsPage.nextProject} index={projects.length} headingLevel="h3" layout="archive" /></li>
       </ul>
     </section>
+
+    <p class="motto">{projectsPage.motto}</p>
+    </div>
   </section>
 </BaseLayout>
 
@@ -41,8 +47,43 @@ const range = (n: number) => String(n).padStart(3, '0');
    * relação ao rótulo, divisória sob a introdução e arquivo em três colunas de
    * 340 px alinhadas à esquerda.
    */
+  /*
+   * A página ocupa ao menos a tela inteira e reserva, abaixo dos cartões, o
+   * espaço do horizonte e da ponte (~42% da altura da arte). Com mais
+   * projetos, o cenário desce junto com o conteúdo.
+   */
+  .projects-page {
+    --art-h: calc(min(100vw, 104.5rem) * 941 / 1672);
+    position: relative;
+    isolation: isolate;
+    /* Altura útil da tela: descontam-se o cabeçalho e sua borda de 1 px. */
+    min-height: calc(100svh - var(--spacing-header) - 1px);
+  }
+
   .page {
-    padding: 4.0625rem 0 6rem;
+    position: relative;
+    padding: 4.0625rem 0 calc(var(--art-h) * 0.43);
+  }
+
+  .motto {
+    position: absolute;
+    bottom: calc(var(--art-h) * 0.31);
+    left: 1.125rem;
+    font-size: 0.65625rem;
+    letter-spacing: 0.08em;
+    line-height: 1rem;
+    text-transform: uppercase;
+    color: var(--color-paper);
+    text-shadow: 0 0 6px var(--color-void);
+  }
+
+  .motto::after {
+    content: '';
+    display: block;
+    width: 3.375rem;
+    height: 1px;
+    margin-top: 1.1rem;
+    background: var(--color-line-strong);
   }
 
   .page :global(.page-head) {
@@ -116,10 +157,21 @@ const range = (n: number) => String(n).padStart(3, '0');
     }
   }
 
+  @media (max-width: 767px) {
+    .projects-page {
+      --art-h: 30.25rem;
+    }
+  }
+
   @media (max-width: 639px) {
     .page :global(.page-head__title),
-    .intro {
+    .intro,
+    .motto {
       margin-left: 0;
+    }
+
+    .motto {
+      left: 0;
     }
 
     .archive__grid {
