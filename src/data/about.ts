@@ -7,20 +7,16 @@ import { site } from '@/data/site';
 
 export interface Experience {
   /** Área ou cargo, por exemplo "Atendimento ao cliente". */
-  title: string | null;
+  title: string;
   /** Período livre, por exemplo "2023 – 2024". */
-  period: string | null;
+  period?: string;
   /** Competências desenvolvidas, mostradas em uma linha. */
   skills: string[];
-  description: string | null;
-  /** Link opcional (empresa, certificado); só então o cartão mostra a seta. */
+  description: string;
+  /** Link opcional; só então o cartão mostra a seta. */
   href?: string;
 }
 
-/*
- * Experiências de trabalho reais, preenchidas pelo autor. Campo `null`
- * aparece na página como "a confirmar"; não preencher com suposições.
- */
 export interface ContactLink {
   label: string;
   icon: 'github' | 'linkedin' | 'mail';
@@ -37,9 +33,19 @@ const contacts: ContactLink[] = [
   { label: 'E-mail', icon: 'mail', handle: 'luscamasfei@gmail.com', href: 'mailto:luscamasfei@gmail.com' },
 ];
 
+/*
+ * Experiências de trabalho reais, informadas pelo autor; não preencher com
+ * suposições. Uma experiência só ocupa a largura toda da seção.
+ */
 const experiences: Experience[] = [
-  { title: null, period: null, skills: [], description: null },
-  { title: null, period: null, skills: [], description: null },
+  {
+    title: 'Em busca da primeira oportunidade',
+    period: 'Atualmente',
+    skills: [],
+    description:
+      'Estou em busca da minha primeira oportunidade na área de desenvolvimento. Enquanto isso, sigo estudando e construindo projetos pessoais.',
+    href: '#contato',
+  },
 ];
 
 export const about = {
